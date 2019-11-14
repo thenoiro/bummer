@@ -16,10 +16,10 @@ const DevServer = require('webpack-dev-server');
 const webpackConfig = webpackConfigBuilder(env);
 const webpackCompiler = Webpack(webpackConfig);
 
-if (env === 'production' || !isDevServer) {
-    launcher = build;
-} else {
+if (env !== 'production' && isDevServer) {
     launcher = runDevServer;
+} else {
+    launcher = build;
 }
 launcher(webpackCompiler, webpackConfig);
 

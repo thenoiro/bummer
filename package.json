@@ -9,8 +9,8 @@
     "build": "NODE_ENV=production node build.js --dev-server",
     "build:open": "NODE_ENV=production node build.js --dev-server --open",
     "build:dev": "NODE_ENV=development node build.js",
-    "dev": "node build.js",
-    "dev:open": "node build.js --open",
+    "dev": "node build.js --dev-server",
+    "dev:open": "node build.js --open --dev-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
