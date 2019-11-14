@@ -6,8 +6,9 @@
   "scripts": {
     "start": "NODE_ENV=production node run.js",
     "start:open": "NODE_ENV=production node run.js --open",
-    "build": "NODE_ENV=production node build.js",
-    "build:open": "NODE_ENV=production node build.js --open",
+    "build": "NODE_ENV=production node build.js --dev-server",
+    "build:open": "NODE_ENV=production node build.js --dev-server --open",
+    "build:dev": "NODE_ENV=development node build.js",
     "dev": "node build.js",
     "dev:open": "node build.js --open",
     "test": "echo \"Error: no test specified\" && exit 1"

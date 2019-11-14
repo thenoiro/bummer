@@ -2,6 +2,7 @@
 const env = process.env.NODE_ENV || 'development';
 const argv = process.argv;
 const isOpen = argv.includes('--open');
+const isDevServer = argv.includes('--dev-server');
 
 /* Dependencies */
 const { log, logError } = require('./porter-logger.js');
@@ -15,7 +16,11 @@ const DevServer = require('webpack-dev-server');
 const webpackConfig = webpackConfigBuilder(env);
 const webpackCompiler = Webpack(webpackConfig);
 
-const launcher = env === 'production' ? build : runDevServer;
+if (env === 'production' || !isDevServer) {
+    launcher = build;
+} else {
+    launcher = runDevServer;
+}
 launcher(webpackCompiler, webpackConfig);
 
 

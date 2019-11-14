@@ -24,7 +24,20 @@ function configBuilder(mode = 'development') {
         entry: './src/porter.ts',
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'porter.js'
+            filename: 'porter.js',
+            library: 'porter',
+            libraryTarget: 'umd',
+            globalObject: `(function() {
+                if (typeof self !== 'undefined') {
+                    return self;
+                } else if (typeof window !== 'undefined') {
+                    return window;
+                } else if (typeof global !== 'undefined') {
+                    return global;
+                } else {
+                    return Function('return this')();
+                }
+            }())`,
         },
         plugins: [
             new CleanWebpackPlugin(),
