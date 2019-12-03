@@ -6,12 +6,13 @@
   "scripts": {
     "start": "NODE_ENV=production node run.js",
     "start:open": "NODE_ENV=production node run.js --open",
-    "build": "NODE_ENV=production node build.js --dev-server",
+    "build": "NODE_ENV=production node build.js",
     "build:open": "NODE_ENV=production node build.js --dev-server --open",
     "build:dev": "NODE_ENV=development node build.js",
     "dev": "node build.js --dev-server",
     "dev:open": "node build.js --open --dev-server",
-    "stop": "node stop.js"
+    "stop": "node stop.js",
+    "test": "NODE_ENV=test node test.js"
   },
   "keywords": [
     "object",

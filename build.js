@@ -1,4 +1,5 @@
 /* Constants */
+const isChild = Boolean(module.parent);
 const env = process.env.NODE_ENV || 'development';
 const argv = process.argv;
 const isOpen = argv.includes('--open');
@@ -21,7 +22,12 @@ if (env !== 'production' && isDevServer) {
 } else {
     launcher = build;
 }
-launcher(webpackCompiler, webpackConfig);
+
+if (isChild) {
+    module.exports = () => launcher(webpackCompiler, webpackConfig);
+} else {
+    launcher(webpackCompiler, webpackConfig);
+}
 
 
 /* Run webpack dev server */
@@ -32,9 +38,12 @@ function runDevServer(compiler, config) {
     const successMessage = `Dev server started successfully at ${url}`;
     const server = new DevServer(compiler, config.devServer);
 
-    server.listen(port, host, () => {
-        log(successMessage);
-        isOpen && openPage(url);
+    return new Promise((resolve) => {
+        server.listen(port, host, () => {
+            log(successMessage);
+            isOpen && openPage(url);
+            resolve();
+        });
     });
 }
 /* Build */
@@ -42,13 +51,17 @@ function build(compiler) {
     const successMessage = `Webpack has finished compilation successfully!`;
     const errorMessage = `Webpack has failed compilation. Something went wrong...`;
 
-    compiler.run((err, stats) => {
-        const error = err || stats.hasErrors();
+    return new Promise((resolve, reject) => {
+        compiler.run((err, stats) => {
+            const error = err || stats.hasErrors();
 
-        if (error) {
-            return logError(errorMessage);
-        }
-        log(successMessage);
-        isOpen && server(env, true);
+            if (error) {
+                logError(errorMessage);
+                return reject();
+            }
+            log(successMessage);
+            isOpen && server(env, true);
+            resolve();
+        });
     });
 }

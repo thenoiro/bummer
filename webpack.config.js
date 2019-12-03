@@ -17,6 +17,12 @@ module.exports = isChild
 
 
 function configBuilder(mode = 'development') {
+    let postfix = '';
+
+    if (mode === 'test') {
+        mode = 'production';
+        postfix = '_test';
+    }
     // Base configuration object
     const config = {
         mode: mode,
@@ -24,7 +30,7 @@ function configBuilder(mode = 'development') {
         entry: './src/porter.ts',
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'porter.js',
+            filename: `porter${postfix}.js`,
             library: 'porter',
             libraryTarget: 'umd',
             globalObject: `(function() {
