@@ -1,9 +1,16 @@
 {
     "compilerOptions": {
         "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
         "module": "es6",
         "target": "ES5",
-        "sourceMap": true
+        "sourceMap": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "alwaysStrict": true,
+        "experimentalDecorators": true
     },
     "include": [
         "src/**/*"
