@@ -11,6 +11,6 @@ builder()
 
 function testPorter() {
     // TODO: Implement tests
-    // const porter = require('./dist/porter_test.js');
-    // const subject = require('./test_subject.js);
+    const porter = require('./dist/porter_test.js');
+    const subject = require('./testSubject.js');
 }
