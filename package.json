@@ -33,5 +33,13 @@
   "dependencies": {
     "express": "^4.17.1",
     "open": "^7.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thenoiro/porter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thenoiro/porter/issues"
+  },
+  "homepage": "https://github.com/thenoiro/porter#readme"
 }
