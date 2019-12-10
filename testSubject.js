@@ -81,4 +81,4 @@ testSubject.books[ hhgg() ][Infinity] = {
 testSubject.books[ hhgg() ][42] = theAnswer;
 
 
-exports.default = testSubject;
+exports.testSubject = {...testSubject};

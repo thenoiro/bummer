@@ -1,16 +1,12 @@
 const builder = require('./build');
 const { log, logError } = require('./porter-logger');
+const { porter } = require('./dist/porter_test.js');
+const { testSubject } = require('./testSubject.js');
+const { tests } = require('./test-scripts.js');
 
 builder()
-    .then(() => {
-        log('Running tests...');
-        testPorter();
-    })
-    .catch(() => logError(`FAIL. Something went wrong building scripts.`));
-
-
-function testPorter() {
-    // TODO: Implement tests
-    const porter = require('./dist/porter_test.js');
-    const subject = require('./testSubject.js');
-}
+  .then(() => {
+    log('Running tests...');
+    tests.forEach((test) => test(porter, testSubject));
+  })
+  .catch((e) => logError('FAIL. Something went wrong building scripts.\n', e));
