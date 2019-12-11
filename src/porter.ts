@@ -5,75 +5,80 @@ type AnyPath = string | PathKey[];
 type Value = any;
 
 interface PorterAPIMethods {
-    get(subject: Subject, path: AnyPath): any;
-    set(subject: Subject, path: AnyPath, value: Value, force?: boolean): any;
-    check(subject: Subject, path: AnyPath): boolean;
-    remove(subject: Subject, path: AnyPath, pop?: boolean): any;
+  get(subject: Subject, path: AnyPath): any;
+  set(subject: Subject, path: AnyPath, value: Value, force?: boolean): any;
+  check(subject: Subject, path: AnyPath): boolean;
+  remove(subject: Subject, path: AnyPath, pop?: boolean): any;
 }
 interface PorterAPI extends PorterAPIMethods {
-    (subject: Subject): PorterWrapper;
+  (subject: Subject): PorterWrapper;
 }
 interface PorterWrapper {
-    get(path: AnyPath): any;
-    set(path: AnyPath, value: Value, force?: boolean): any;
-    check(path: AnyPath): boolean;
-    remove(path: AnyPath, pop?: boolean): any;
+  get(path: AnyPath): any;
+  set(path: AnyPath, value: Value, force?: boolean): any;
+  check(path: AnyPath): boolean;
+  remove(path: AnyPath, pop?: boolean): any;
 }
 
-const log = console.log;
+const inform = console;
+const log = (...args: any) => {
+  inform.log(...args);
+};
 const rnd = Math.random;
 
 
 class Porter implements PorterWrapper {
-    private subject: Subject;
+  private subject: Subject;
 
-    constructor(subject: Subject) {
-        this.subject = subject;
-    }
+  constructor(subject: Subject) {
+    this.subject = subject;
+  }
 
-    get(path: AnyPath) {
-        log(path, this.subject);
-    }
-    set(path: AnyPath, value: Value, force = true) {
-        log(path, value, force);
-    }
-    check(path: AnyPath) {
-        log(path);
-        return rnd() > 0.5;
-    }
-    remove(path: AnyPath, pop = false) {
-        log(path, pop);
-        return rnd() > 0.5 ? rnd() > 0.5 : {};
-    }
+  get(path: AnyPath) {
+    log(path, this.subject);
+  }
+
+  set(path: AnyPath, value: Value, force = true) {
+    log(this.subject, path, value, force);
+  }
+
+  check(path: AnyPath) {
+    log(this.subject, path);
+    return rnd() > 0.5;
+  }
+
+  remove(path: AnyPath, pop = false) {
+    log(this.subject, path, pop);
+    return rnd() > 0.5 ? rnd() > 0.5 : {};
+  }
 }
 
 const porter: PorterAPI = (subject) => {
-    const wrapper = new Porter(subject);
+  const wrapper = new Porter(subject);
 
-    return {
-        get: wrapper.get,
-        set: wrapper.set,
-        check: wrapper.check,
-        remove: wrapper.remove,
-    };
-}
+  return {
+    get: wrapper.get,
+    set: wrapper.set,
+    check: wrapper.check,
+    remove: wrapper.remove,
+  };
+};
+
 porter.get = (subject, path) => {
-    log(subject, path);
-}
+  log(subject, path);
+};
 porter.set = (subject, path, value, force = true) => {
-    log(subject, path, value, force);
-    return rnd() > 0.5;
-}
+  log(subject, path, value, force);
+  return rnd() > 0.5;
+};
 porter.check = (subject, path) => {
-    log(subject, path);
-    return rnd() > 0.5;
-}
+  log(subject, path);
+  return rnd() > 0.5;
+};
 porter.remove = (subject, path, pop = false) => {
-    log(subject, path, pop);
-    return rnd() > 0.5 ? rnd() > 0.5 : {};
-}
+  log(subject, path, pop);
+  return rnd() > 0.5 ? rnd() > 0.5 : {};
+};
 
 
-if (module && typeof module === 'object') {
-    module.exports = porter;
-}
+export default porter;

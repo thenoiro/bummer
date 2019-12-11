@@ -1,10 +1,12 @@
 const fkill = require('fkill');
 
+const inform = console;
+
 try {
-    fkill(':8080', {
-        force: true,
-        silent: true,
-    });
+  fkill(':8080', {
+    force: true,
+    silent: true,
+  });
 } catch (ex) {
-    console.error(ex);
+  inform.error(ex);
 }

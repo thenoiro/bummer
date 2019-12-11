@@ -8,66 +8,65 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 
-module.exports = isChild
-    // In case file used as a module, return config builder function
-    ? configBuilder
-    // Otherwise return config object
-    : configBuilder(env);
+function configBuilder(en = 'development') {
+  let postfix = '';
+  let mode = en;
 
-
-
-function configBuilder(mode = 'development') {
-    let postfix = '';
-
-    if (mode === 'test') {
-        mode = 'production';
-        postfix = '_test';
-    }
-    // Base configuration object
-    const config = {
-        mode: mode,
-        devtool: mode === 'development' ? 'inline-source-map' : 'source-map',
-        entry: './src/porter.ts',
-        output: {
-            path: path.resolve(__dirname, 'dist'),
-            filename: `porter${postfix}.js`,
-            library: 'porter',
-            libraryTarget: 'umd',
-            globalObject: `(function() {
-                if (typeof self !== 'undefined') {
-                    return self;
-                } else if (typeof window !== 'undefined') {
-                    return window;
-                } else if (typeof global !== 'undefined') {
-                    return global;
-                } else {
-                    return Function('return this')();
-                }
-            }())`,
+  if (mode === 'test') {
+    mode = 'production';
+    postfix = '_test';
+  }
+  // Base configuration object
+  const config = {
+    mode,
+    devtool: mode === 'development' ? 'inline-source-map' : 'source-map',
+    entry: './src/porter.ts',
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: `porter${postfix}.js`,
+      library: 'porter',
+      libraryTarget: 'umd',
+      globalObject: `(function() {
+        if (typeof self !== 'undefined') {
+          return self;
+        } else if (typeof window !== 'undefined') {
+          return window;
+        } else if (typeof global !== 'undefined') {
+          return global;
+        } else {
+          return Function('return this')();
+        }
+      }())`,
+    },
+    plugins: [
+      new CleanWebpackPlugin(),
+      new HtmlWebpackPlugin({
+        template: './src/index.ejs',
+        templateParameters: {
+          title: 'Porter Test Page',
+          testvar: 'Test works',
         },
-        plugins: [
-            new CleanWebpackPlugin(),
-            new HtmlWebpackPlugin({
-                template: './src/index.ejs',
-                templateParameters: {
-                    'title': 'Porter Test Page',
-                    'testvar': 'Test works',
-                },
-                favicon: './src/favicon.ico',
-            }),
-        ],
-        module: {
-            rules: [
-                {
-                    test: /\.ts$/,
-                    use: 'ts-loader',
-                    exclude: '/node_modules/'
-                },
-            ],
+        favicon: './src/favicon.ico',
+      }),
+    ],
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: 'ts-loader',
+          exclude: '/node_modules/',
         },
-        resolve: {
-            extensions: ['.ts', '.js']
-        },
-    };
-    return config;
+      ],
+    },
+    resolve: {
+      extensions: ['.ts', '.js'],
+    },
+  };
+  return config;
 }
+
+module.exports = isChild
+  // In case file used as a module, return config builder function
+  ? configBuilder
+  // Otherwise return config object
+  : configBuilder(env);
