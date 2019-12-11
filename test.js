@@ -1,6 +1,6 @@
 const builder = require('./build');
+const { porter } = require('./dist/porter_test.js').default;
 const { log, logError } = require('./porter-logger');
-const { porter } = require('./dist/porter_test.js');
 const { testSubject } = require('./testSubject.js');
 const { tests } = require('./test-scripts.js');
 

@@ -2,7 +2,6 @@ const { log, logError } = require('./porter-logger');
 
 const FAIL = 'FAIL';
 const SUCCESS = 'SUCCESS';
-
 let testCounter = 1;
 
 const logTestResults = (testMsg, request, expected, result) => {
@@ -17,7 +16,7 @@ const logTestResults = (testMsg, request, expected, result) => {
   ]);
 };
 
-const testScripts = [
+const tests = [
   /** Test porter.get(object, path) */
   (porter, target) => {
     const testMessage = 'Porter.get: Should return the value by simple path.';
@@ -77,4 +76,4 @@ const testScripts = [
   },
 ];
 
-export default { testScripts }
+module.exports = { tests };
