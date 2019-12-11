@@ -6,12 +6,13 @@
   "scripts": {
     "start": "NODE_ENV=production node run.js",
     "start:open": "NODE_ENV=production node run.js --open",
-    "build": "NODE_ENV=production node build.js --dev-server",
+    "build": "NODE_ENV=production node build.js",
     "build:open": "NODE_ENV=production node build.js --dev-server --open",
     "build:dev": "NODE_ENV=development node build.js",
     "dev": "node build.js --dev-server",
     "dev:open": "node build.js --open --dev-server",
-    "stop": "node stop.js"
+    "stop": "node stop.js",
+    "test": "NODE_ENV=test node test.js"
   },
   "keywords": [
     "object",
@@ -21,7 +22,13 @@
   "author": "Chernovol Bohdan",
   "license": "ISC",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.11.0",
+    "@typescript-eslint/parser": "^2.11.0",
     "clean-webpack-plugin": "^3.0.0",
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-airbnb-typescript": "^6.3.1",
+    "eslint-plugin-import": "^2.19.1",
     "fkill": "^6.2.0",
     "html-webpack-plugin": "^3.2.0",
     "ts-loader": "^6.2.1",
