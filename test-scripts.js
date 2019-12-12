@@ -2,17 +2,13 @@ const { log, logError } = require('./porter-logger');
 
 const FAIL = 'FAIL';
 const SUCCESS = 'SUCCESS';
-let testCounter = 1;
+let testCounter = 0;
 
-const logTestResults = (testMsg, request, expected, result) => {
-  const delimiter = '-------------------------------------\n';
+const logTestResults = (testMsg, request, result) => {
   log(...[
-    delimiter,
     `TEST ${testCounter += 1}: ${testMsg}\n`,
     `Request: ${request}\n`,
-    // `Expected: ${expected}\n`,
-    '...\n',
-    `Result: ${result()}\n`,
+    `... ${result()}\n`,
   ]);
 };
 
@@ -42,7 +38,7 @@ const tests = [
         }
         return result;
       };
-      logTestResults(testMessage, requestString, expected, callback);
+      logTestResults(testMessage, requestString, callback);
     });
   },
 
@@ -71,7 +67,7 @@ const tests = [
         }
         return result;
       };
-      logTestResults(testMessage, requestString, expected, callback);
+      logTestResults(testMessage, requestString, callback);
     });
   },
 ];
