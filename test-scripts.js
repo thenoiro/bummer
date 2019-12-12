@@ -4,72 +4,58 @@ const FAIL = 'FAIL';
 const SUCCESS = 'SUCCESS';
 let testCounter = 0;
 
-const logTestResults = (testMsg, request, result) => {
+const logResults = (testMsg, request, result) => {
   log(...[
     `TEST ${testCounter += 1}: ${testMsg}\n`,
     `Request: ${request}\n`,
     `... ${result()}\n`,
   ]);
 };
+const testLauncher = (executor, expected) => {
+  let result = FAIL;
 
-const tests = [
-  /** Test porter.get(object, path) */
-  (porter, target) => {
-    const testMessage = 'Porter.get: Should return the value by simple path.';
-    const expected = target.games['Half-Life'];
-    const requests = [
-      'games.Half-Life',
-      'games[Half-Life]',
-      "games['Half-Life']",
-    ];
-    requests.forEach((path) => {
-      const requestString = `porter.get(testSubject, '${path}')`;
-      const callback = () => {
-        let result = FAIL;
+  try {
+    const value = executor();
 
-        try {
-          const value = porter.get(target, path);
+    if (value === expected) {
+      result = SUCCESS;
+    }
+  } catch (ex) {
+    logError(ex);
+  }
+  return result;
+};
 
-          if (value === expected) {
-            result = SUCCESS;
-          }
-        } catch (ex) {
-          logError(ex);
-        }
-        return result;
-      };
-      logTestResults(testMessage, requestString, callback);
-    });
-  },
-
-  /** Test porter(object).get(path) */
-  (porter, target) => {
-    const testMessage = 'porterInstance.get. Should return the value by simple path.';
-    const expected = target.games['Half-Life'];
-    const requests = [
-      'games.Half-Life',
-      'games[Half-Life]',
-      "games['Half-Life']",
-    ];
-    requests.forEach((path) => {
-      const requestString = `porter(testSubject).get('${path}')`;
-      const callback = () => {
-        let result = FAIL;
-
-        try {
-          const value = porter(target).get(path);
-
-          if (value === expected) {
-            result = SUCCESS;
-          }
-        } catch (ex) {
-          logError(ex);
-        }
-        return result;
-      };
-      logTestResults(testMessage, requestString, callback);
-    });
-  },
+const tests = [];
+const requests = [
+  'games.Half-Life',
+  'games[Half-Life]',
+  "games['Half-Life']",
 ];
+
+/** Test porter.get(object, path) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    const executor = () => porter.get(target, path);
+    const callback = () => testLauncher(executor, target.games['Half-Life']);
+    logResults(
+      'Porter.get: Should return the value by simple path.',
+      `porter.get(testSubject, '${path}')`,
+      callback,
+    );
+  });
+});
+/** Test porter(object).get(path) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    const executor = () => porter(target).get(path);
+    const callback = () => testLauncher(executor, target.games['Half-Life']);
+    logResults(
+      'Porter.get: Should return the value by simple path.',
+      `porter.get(testSubject, '${path}')`,
+      callback,
+    );
+  });
+});
 
 module.exports = { tests };
