@@ -162,6 +162,318 @@ requests.forEach((path) => {
   });
 });
 
+/** Test porter.check(object, path) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.check: Should return <true> for existing property.',
+      `porter.check(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.check(target, path),
+        (v) => v === true,
+      ),
+    );
+  });
+});
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    logResults(
+      'Porter.check: Should return <false> for non-existing property.',
+      `porter.check({}, '${path}')`,
+      testLauncher(
+        () => porter.check({}, path),
+        (v) => v === false,
+      ),
+    );
+  });
+});
+
+/** Test porter(object).check(path) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.check: Should return <true> for existing property.',
+      `porter(targetObject).check('${path}')`,
+      testLauncher(
+        () => porter.check(target, path),
+        (v) => v === true,
+      ),
+    );
+  });
+});
+
+/** Test porter(object).check(path) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    logResults(
+      'Porter.check: Should return <false> for non-existing property.',
+      `porter({}).check('${path}')`,
+      testLauncher(
+        () => porter.check({}, path),
+        (v) => v === false,
+      ),
+    );
+  });
+});
+
+/** Test porter.remove(object, path, pop) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.games, 'Half-Life'),
+      ),
+    );
+  });
+});
+
+/** Test porter(object).remove(path, pop) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter(targetObject).remove('${path}')`,
+      testLauncher(
+        () => porter(target).remove(path),
+        (v) => v === true && !has(target.games, 'Half-Life'),
+      ),
+    );
+  });
+});
+
+/** Test porter.remove(object, path, pop) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const message = (
+      'Porter.remove: Should try to delete a property by the non-existing path '
+      + 'and return the <false> value (success)'
+    );
+    logResults(
+      message,
+      `porter.remove({}, '${path}')`,
+      testLauncher(
+        () => porter.remove({}, path),
+        (v) => v === false,
+      ),
+    );
+  });
+});
+
+/** Test porter(object).remove(path, pop) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const message = (
+      'Porter.remove: Should try to delete a property by the non-existing path '
+      + 'and return the <false> value (success)'
+    );
+    logResults(
+      message,
+      `porter(targetObject).remove('${path}')`,
+      testLauncher(
+        () => porter({}).remove(path),
+        (v) => v === false,
+      ),
+    );
+  });
+});
+
+
+/** Test porter.remove(object, path, pop) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    const targetValue = target.games['Half-Life'];
+
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the value from there.',
+      `porter.remove(targetObject, '${path}', true)`,
+      testLauncher(
+        () => porter.remove(target, path, true),
+        (v) => v === targetValue && !has(target.games, 'Half-Life'),
+      ),
+    );
+  });
+});
+
+/** Test porter(object).remove(path, pop) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    const targetValue = target.games['Half-Life'];
+
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the value from there.',
+      `porter(targetObject).remove('${path}', true)`,
+      testLauncher(
+        () => porter(target).remove(path),
+        (v) => v === targetValue && !has(target.games, 'Half-Life'),
+      ),
+    );
+  });
+});
+
+/** Test porter.remove(object, path, pop) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const message = (
+      'Porter.remove: Should try to delete a property by the non-existing path and return the '
+      + 'undefined value'
+    );
+    logResults(
+      message,
+      `porter.remove({}, '${path}, true')`,
+      testLauncher(
+        () => porter.remove({}, path, true),
+        (v) => v === undefined,
+      ),
+    );
+  });
+});
+
+/** Test porter.remove(object, path, pop) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const message = (
+      'Porter.remove: Should try to delete a property by the non-existing path and return the '
+      + 'undefined value'
+    );
+    logResults(
+      message,
+      `porter({}).remove('${path}, true')`,
+      testLauncher(
+        () => porter({}).remove(path, true),
+        (v) => v === undefined,
+      ),
+    );
+  });
+});
+
+/** Test porter.replace(object, path, value) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const previousValue = target.games['Half-Life'];
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && target.games['Half-Life'] !== previousValue
+          && target.games['Half-Life'] === value
+        ),
+      ),
+    );
+  });
+});
+
+/** Test porter(object).replace(path, value) */
+requests.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const previousValue = target.games['Half-Life'];
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter(targetObject).replace('${path}', value)`,
+      testLauncher(
+        () => porter(target).replace(path, value),
+        (v) => (
+          v === previousValue
+          && target.games['Half-Life'] !== previousValue
+          && target.games['Half-Life'] === value
+        ),
+      ),
+    );
+  });
+});
+
+/** Test porter.replace(object, path, value) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const value = Symbol('Value');
+    const message = (
+      'Porter.replace: Should try to replace the value by non-existing path with the new value. '
+      + 'Returned value expected: <undefined>. New value has to be setted up by the path '
+      + 'successfully.'
+    );
+    logResults(
+      message,
+      `porter.replace({}, '${path}', value)`,
+      testLauncher(
+        () => porter.replace({}, path, value),
+        (v) => v === undefined && target.games && target.games['Half-Life'] === value,
+      ),
+    );
+  });
+});
+
+/** Test porter(object).replace(path, value) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const value = Symbol('Value');
+    const message = (
+      'Porter.replace: Should try to replace the value by non-existing path with the new value. '
+      + 'Returned value expected: <undefined>. New value has to be setted up by the path '
+      + 'successfully.'
+    );
+    logResults(
+      message,
+      `porter({}).replace('${path}', value)`,
+      testLauncher(
+        () => porter(target).replace(path, value),
+        (v) => v === undefined && target.games && target.games['Half-Life'] === value,
+      ),
+    );
+  });
+});
+
+/** Test porter.replace(object, path, value) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const value = Symbol('Value');
+    const message = (
+      'Porter.replace: Should try to replace the value by non-existing path with the new value. '
+      + 'Returned value expected: <undefined>. Object structure should be unchanged.'
+    );
+    logResults(
+      message,
+      `porter.replace({}, '${path}', value, false)`,
+      testLauncher(
+        () => porter.replace(target, path, value, false),
+        (v) => v === undefined && !has(target, 'games'),
+      ),
+    );
+  });
+});
+
+/** Test porter(object).replace(path, value) */
+requests.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const value = Symbol('Value');
+    const message = (
+      'Porter.replace: Should try to replace the value by non-existing path with the new value. '
+      + 'Returned value expected: <undefined>. Object structure should be unchanged.'
+    );
+    logResults(
+      message,
+      `porter({}).replace('${path}', value, false)`,
+      testLauncher(
+        () => porter(target).replace(path, value, false),
+        (v) => v === undefined && !has(target, 'games'),
+      ),
+    );
+  });
+});
+
+
 /** Summary */
 tests.push((/* porter, target */) => {
   log(
