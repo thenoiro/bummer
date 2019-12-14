@@ -102,7 +102,7 @@ requests.forEach((path) => {
 
     logResults(
       'Porter.set: Should set the value by non-existing path, and return the <true> value.',
-      `porter.set({}, '${path}')`,
+      `porter.set({}, '${path}', value)`,
       testLauncher(
         () => porter.set(target, path),
         (v) => v === true && target.games['Half-Life'] === settedValue,
@@ -119,7 +119,7 @@ requests.forEach((path) => {
 
     logResults(
       'Porter.set: Should set the value by non-existing path, and return the <true> value.',
-      `porter({}).set('${path}')`,
+      `porter({}).set('${path}', value)`,
       testLauncher(
         () => porter(target).set(path),
         (v) => v === true && target.games['Half-Life'] === settedValue,
@@ -136,9 +136,9 @@ requests.forEach((path) => {
 
     logResults(
       'Porter.set: Should try to set the value by non-existing path, and return the <false> value.',
-      `porter.set({}, '${path}')`,
+      `porter.set({}, '${path}', value, false)`,
       testLauncher(
-        () => porter.set(target, path, settedValue),
+        () => porter.set(target, path, settedValue, false),
         (v) => v === false && !has(target, 'games'),
       ),
     );
@@ -153,9 +153,9 @@ requests.forEach((path) => {
 
     logResults(
       'Porter.set: Should try to set the value by non-existing path, and return the <false> value.',
-      `porter({}).set('${path}')`,
+      `porter({}).set('${path}', value, false)`,
       testLauncher(
-        () => porter(target).set(path, settedValue),
+        () => porter(target).set(path, settedValue, false),
         (v) => v === false && !has(target, 'games'),
       ),
     );
