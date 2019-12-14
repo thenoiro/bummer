@@ -1,2 +1,6 @@
-declare const testSubject: object;
-export default testSubject;
+interface GetTestSubject {
+  getTestSubject: () => object;
+}
+
+declare const getTestSubject: GetTestSubject;
+export default getTestSubject;
