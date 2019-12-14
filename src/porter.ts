@@ -1,30 +1,33 @@
 type Subject = object;
 type Path = string;
 type PathKey = string | symbol | number;
-type AnyPath = string | PathKey[];
+type AnyPath = Path | PathKey[];
 type Value = any;
+type Result = boolean;
+type Flag = boolean;
 
 interface PorterAPIMethods {
-  get(subject: Subject, path: AnyPath): any;
-  set(subject: Subject, path: AnyPath, value: Value, force?: boolean): any;
-  check(subject: Subject, path: AnyPath): boolean;
-  remove(subject: Subject, path: AnyPath, pop?: boolean): any;
+  get(subject: Subject, path: AnyPath): Value;
+  set(subject: Subject, path: AnyPath, value: Value, force?: Flag): Result;
+  check(subject: Subject, path: AnyPath): Result;
+  remove(subject: Subject, path: AnyPath, pop?: Flag): Result | Value;
+  replace(subject: Subject, path: AnyPath, value: Value, force: Flag): Value;
 }
 interface PorterAPI extends PorterAPIMethods {
   (subject: Subject): PorterWrapper;
 }
 interface PorterWrapper {
-  get(path: AnyPath): any;
-  set(path: AnyPath, value: Value, force?: boolean): any;
-  check(path: AnyPath): boolean;
-  remove(path: AnyPath, pop?: boolean): any;
+  get(path: AnyPath): Value;
+  set(path: AnyPath, value: Value, force?: Flag): Result;
+  check(path: AnyPath): Result;
+  remove(path: AnyPath, pop?: Flag): Result | Value;
+  replace(path: AnyPath, value: Value, force: Flag): Value;
 }
 
 const inform = console;
 const log = (...args: any) => {
   inform.log(...args);
 };
-const rnd = Math.random;
 
 
 class Porter implements PorterWrapper {
@@ -36,20 +39,27 @@ class Porter implements PorterWrapper {
 
   get(path: AnyPath) {
     log(path, this.subject);
+    return undefined;
   }
 
-  set(path: AnyPath, value: Value, force = true) {
+  set(path: AnyPath, value: Value, force: Flag = true) {
     log(this.subject, path, value, force);
+    return false;
   }
 
   check(path: AnyPath) {
     log(this.subject, path);
-    return rnd() > 0.5;
+    return false;
   }
 
-  remove(path: AnyPath, pop = false) {
+  remove(path: AnyPath, pop: Flag = false) {
     log(this.subject, path, pop);
-    return rnd() > 0.5 ? rnd() > 0.5 : {};
+    return pop ? undefined : false;
+  }
+
+  replace(path: AnyPath, value: Value, force = true) {
+    log(this.subject, path, value, force);
+    return undefined;
   }
 }
 
@@ -61,23 +71,29 @@ const porter: PorterAPI = (subject) => {
     set: wrapper.set,
     check: wrapper.check,
     remove: wrapper.remove,
+    replace: wrapper.replace,
   };
 };
 
 porter.get = (subject, path) => {
   log(subject, path);
+  return undefined;
 };
 porter.set = (subject, path, value, force = true) => {
   log(subject, path, value, force);
-  return rnd() > 0.5;
+  return false;
 };
 porter.check = (subject, path) => {
   log(subject, path);
-  return rnd() > 0.5;
+  return false;
 };
 porter.remove = (subject, path, pop = false) => {
   log(subject, path, pop);
-  return rnd() > 0.5 ? rnd() > 0.5 : {};
+  return pop ? undefined : false;
+};
+porter.replace = (subject, path, value, force = true) => {
+  log(subject, path, value, force);
+  return undefined;
 };
 
 
