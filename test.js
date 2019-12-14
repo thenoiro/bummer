@@ -1,4 +1,7 @@
 const builder = require('./build');
+
+// INFO: Porter will be resolved after 'npm run test' script running.
+// eslint-disable-next-line
 const porter = require('./dist/porter_test.js').default;
 const { log, logError } = require('./porter-logger');
 const { getTestSubject } = require('./testSubject.js');
