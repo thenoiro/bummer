@@ -22,7 +22,7 @@ function configBuilder(en = 'development') {
     devtool: mode === 'development' ? 'inline-source-map' : 'source-map',
     entry: './src/porter.ts',
     output: {
-      path: path.resolve(__dirname, 'dist'),
+      path: path.resolve(__dirname, dist),
       filename: `porter${postfix}.js`,
       library: 'porter',
       libraryTarget: 'umd',
@@ -60,6 +60,12 @@ function configBuilder(en = 'development') {
     },
     resolve: {
       extensions: ['.ts', '.js'],
+    },
+    devServer: {
+      contentBase: `./${dist}`,
+      watchOptions: {
+        poll: true,
+      },
     },
   };
   return config;
