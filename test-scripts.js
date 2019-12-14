@@ -4,6 +4,11 @@ const FAIL = 'FAIL';
 const SUCCESS = 'SUCCESS';
 let testCounter = 0;
 
+const summary = {
+  [FAIL]: 0,
+  [SUCCESS]: 0,
+};
+
 const logResults = (testMsg, request, result) => {
   log(...[
     `TEST ${testCounter += 1}: ${testMsg}\n`,
@@ -23,6 +28,7 @@ const testLauncher = (executor, expected) => {
   } catch (ex) {
     logError(ex);
   }
+  summary[result] += 1;
   return result;
 };
 
@@ -45,6 +51,7 @@ requests.forEach((path) => {
     );
   });
 });
+
 /** Test porter(object).get(path) */
 requests.forEach((path) => {
   tests.push((porter, target) => {
@@ -57,5 +64,15 @@ requests.forEach((path) => {
     );
   });
 });
+
+/** Summary */
+tests.push((/* porter, target */) => {
+  log(
+    'SUMMARY:\n',
+    `> Success: ${summary[SUCCESS]}\n`,
+    `> Fails: ${summary[FAIL]}`,
+  );
+});
+
 
 module.exports = { tests };
