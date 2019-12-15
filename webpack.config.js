@@ -1,6 +1,7 @@
 /* Constants */
 const isChild = Boolean(module.parent);
 const env = process.env.NODE_ENV || 'development';
+const dist = 'dist';
 
 /* Dependencies */
 const path = require('path');
@@ -22,9 +23,10 @@ function configBuilder(en = 'development') {
     devtool: mode === 'development' ? 'inline-source-map' : 'source-map',
     entry: './src/porter.ts',
     output: {
-      path: path.resolve(__dirname, 'dist'),
+      path: path.resolve(__dirname, dist),
       filename: `porter${postfix}.js`,
       library: 'porter',
+      libraryExport: 'default',
       libraryTarget: 'umd',
       globalObject: `(function() {
         if (typeof self !== 'undefined') {
@@ -60,6 +62,12 @@ function configBuilder(en = 'development') {
     },
     resolve: {
       extensions: ['.ts', '.js'],
+    },
+    devServer: {
+      contentBase: `./${dist}`,
+      watchOptions: {
+        poll: true,
+      },
     },
   };
   return config;
