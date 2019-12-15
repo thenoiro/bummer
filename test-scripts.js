@@ -19,16 +19,59 @@ const tests = [];
 const FAIL = 'FAIL';
 const SUCCESS = 'SUCCESS';
 const has = (object, property) => Object.prototype.hasOwnProperty.call(object, property);
+const hhgg = () => "The Hitchhiker's Guide to te Galaxy";
 
 const summary = {
   [FAIL]: 0,
   [SUCCESS]: 0,
 };
-const requests = [
+const requestsSimple = [
   'games.Half-Life',
   'games[Half-Life]',
   "games['Half-Life']",
+  'games["Half-Life"]',
 ];
+const requestsArrayProperties = [
+  `books.${hhgg()}.0.name`,
+  `books.${hhgg()}[0].name`,
+  `books.${hhgg()}['0'].name`,
+  `books.${hhgg()}["0"].name`,
+  // `books.${hhgg()}.[0].name`,
+  // `books.${hhgg()}.'0'.name`,
+];
+const requestsArrayNonStandardProperties = [
+  `books.${hhgg()}.info.name`,
+  `books.${hhgg()}.13`,
+  `books.${hhgg()}.42.`,
+];
+const requestsNullableProperties = [
+  `books.${hhgg()}.2.read`,
+  `books.${hhgg()}.3.read`,
+  `books.${hhgg()}.5.year`,
+  'games.Half-Life.4',
+];
+const requestsByMixedType = [
+  ['games', 'Half-Life', '0', 'year'],
+  ['games.Half-Life', '0.year'],
+  ['games.Half-Life', '[0].year'],
+  ['games.Half-Life', "['0'].year"],
+  ['games.Half-Life', 0, 'year'],
+];
+const requestsInfinityValue = [
+  ['books', hhgg(), Infinity, 'name'],
+];
+
+const joinSplittedPath = (pathArray) => {
+  const slices = pathArray.map((p) => {
+    const stringSlice = String(p);
+
+    if (stringSlice.indexOf("'") === -1) {
+      return `'${stringSlice}'`;
+    }
+    return `"${stringSlice}"`;
+  });
+  return slices.join(', ');
+};
 
 /**
  * Log test meta and results
@@ -66,8 +109,11 @@ const testLauncher = (executor, moderator) => {
   return result;
 };
 
-/** Test porter.get(object, path) */
-requests.forEach((path) => {
+
+/** GET */
+
+/** porter.get(object, path) */
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.get: Should return the value by simple path.',
@@ -79,9 +125,98 @@ requests.forEach((path) => {
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter, target) => {
+    const message = (
+      'Porter.get: Should return an array property by index in different representations '
+      + '(string, number, etc).'
+    );
+    logResults(
+      message,
+      `porter.get(testSubject, '${path}')`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => v === target.books[hhgg()][0].name,
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const middleNode = target.books[hhgg()];
 
-/** Test porter(object).get(path) */
-requests.forEach((path) => {
+    logResults(
+      'Porter.get: Should return an array non-index property successfully.',
+      `porter.get(testSubject, ${path})`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => {
+          switch (i) {
+            case 0: return v === middleNode.info.name;
+            case 1: return v === undefined;
+            case 2: return v === middleNode[42];
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsNullableProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.get: Should return nullable values (undefined, NaN, null) successfully.',
+      `porter.get(testSubject, ${path})`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => {
+          switch (i) {
+            case 0: return v === false;
+            case 1: return v === null;
+            case 2: return Number.isNaN(v);
+            case 3: return v === undefined;
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter, target) => {
+    const message = (
+      'Porter.get: Should return values successfully by the array of path pieces (which presented'
+      + 'as strings or numbers)'
+    );
+    logResults(
+      message,
+      `porter.get(testSubject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => v === target.games['Half-Life'][0].year,
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter, target) => {
+    const message = (
+      'Porter.get: Should return value by an array of path pieces, which contains Infinit value as'
+      + ' an object key'
+    );
+    logResults(
+      message,
+      `porter.get(testSubject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => v === target.books[hhgg()][Infinity].name,
+      ),
+    );
+  });
+});
+
+/** porter(object).get(path) */
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.get: Should return the value by simple path.',
@@ -94,8 +229,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** SET */
+
 /** Test porter.set(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -112,7 +250,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).set(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -129,7 +267,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.set(object, path, value, false) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -146,7 +284,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).set(path, value, false) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -162,8 +300,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** CHECK */
+
 /** Test porter.check(object, path) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.check: Should return <true> for existing property.',
@@ -175,7 +316,7 @@ requests.forEach((path) => {
     );
   });
 });
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     logResults(
       'Porter.check: Should return <false> for non-existing property.',
@@ -189,7 +330,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).check(path) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.check: Should return <true> for existing property.',
@@ -203,7 +344,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).check(path) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     logResults(
       'Porter.check: Should return <false> for non-existing property.',
@@ -216,8 +357,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** REMOVE */
+
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.remove: Should delete a property by the path and return the <true> value (success)',
@@ -231,7 +375,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).remove(path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.remove: Should delete a property by the path and return the <true> value (success)',
@@ -245,7 +389,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path '
@@ -263,7 +407,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).remove(path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path '
@@ -282,7 +426,7 @@ requests.forEach((path) => {
 
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const targetValue = target.games['Half-Life'];
 
@@ -298,7 +442,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).remove(path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const targetValue = target.games['Half-Life'];
 
@@ -314,7 +458,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path and return the '
@@ -332,7 +476,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path and return the '
@@ -349,8 +493,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** REPLACE */
+
 /** Test porter.replace(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const value = Symbol('Value');
     const previousValue = target.games['Half-Life'];
@@ -371,7 +518,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).replace(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const value = Symbol('Value');
     const previousValue = target.games['Half-Life'];
@@ -392,7 +539,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.replace(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -413,7 +560,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).replace(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -434,7 +581,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.replace(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -454,7 +601,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).replace(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -473,6 +620,8 @@ requests.forEach((path) => {
   });
 });
 
+
+/** SPECIAL */
 
 /** Summary */
 tests.push((/* porter, target */) => {
