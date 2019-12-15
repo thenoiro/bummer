@@ -332,7 +332,7 @@ requestsSimple.forEach((path) => {
       'Porter.set: Should set the value by non-existing path, and return the <true> value.',
       `porter({}).set('${path}', value)`,
       testLauncher(
-        () => porter(target).set(path),
+        () => porter(target).set(path, settedValue),
         (v) => v === true && target.games['Half-Life'] === settedValue,
       ),
     );
@@ -377,11 +377,22 @@ requestsSimple.forEach((path) => {
 /** CHECK */
 
 /** Test porter.check(object, path) */
-requestsSimple.forEach((path) => {
+[
+  ...requestsSimple,
+  ...requestsArrayProperties,
+  ...requestsArrayNonStandardProperties,
+  ...requestsNullableProperties,
+  ...requestsByMixedType,
+  ...requestsInfinityValue,
+].forEach((path) => {
   tests.push((porter, target) => {
+    const pathStringRepresentation = Array.isArray(path)
+      ? `[${joinSplittedPath(path)}]`
+      : `'${path}'`;
+
     logResults(
       'Porter.check: Should return <true> for existing property.',
-      `porter.check(targetObject, '${path}')`,
+      `porter.check(targetObject, ${pathStringRepresentation})`,
       testLauncher(
         () => porter.check(target, path),
         (v) => v === true,
@@ -389,6 +400,8 @@ requestsSimple.forEach((path) => {
     );
   });
 });
+
+/** Test porter.check(object, path) */
 requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     logResults(
