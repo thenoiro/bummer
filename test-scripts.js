@@ -24,6 +24,7 @@ const hhgg = () => "The Hitchhiker's Guide to te Galaxy";
 const summary = {
   [FAIL]: 0,
   [SUCCESS]: 0,
+  errors: 0,
 };
 const requestsSimple = [
   'games.Half-Life',
@@ -104,6 +105,7 @@ const testLauncher = (executor, moderator) => {
     }
   } catch (ex) {
     logError(ex);
+    summary.errors += 1;
   }
   summary[result] += 1;
   return result;
@@ -242,12 +244,83 @@ requestsSimple.forEach((path) => {
       'Porter.set: Should set the value by non-existing path, and return the <true> value.',
       `porter.set({}, '${path}', value)`,
       testLauncher(
-        () => porter.set(target, path),
+        () => porter.set(target, path, settedValue),
         (v) => v === true && target.games['Half-Life'] === settedValue,
       ),
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const settedValue = Symbol('Value');
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${path}', value)`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => v === true && target.books[hhgg()][0].name === settedValue,
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const settedValue = Symbol('Value');
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${path}', value)`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => {
+          const success = v === true;
+          const middleNode = target.books[hhgg()];
+
+          switch (i) {
+            case 0: return success && middleNode.info.name === settedValue;
+            case 1: return success && middleNode[13] === settedValue;
+            case 2: return success && middleNode[42] === settedValue;
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const settedValue = Symbol('Value');
+    const target = {};
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${joinSplittedPath(path)}', value)`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => v === true && v === target.games['Half-Life'][0].year,
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const settedValue = Symbol('Value');
+    const target = {};
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${joinSplittedPath})', value`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => v === true && target.books[hhgg()][Infinity].name === settedValue,
+      ),
+    );
+  });
+});
+
 
 /** Test porter(object).set(path, value) */
 requestsSimple.forEach((path) => {
@@ -629,7 +702,8 @@ tests.push((/* porter, target */) => {
     'SUMMARY:\n',
     `> Total: ${testCounter}\n`,
     `> Success: ${summary[SUCCESS]}\n`,
-    `> Fails: ${summary[FAIL]}`,
+    `> Fails: ${summary[FAIL]}\n`,
+    `>> Errors: ${summary.errors}`,
   );
 });
 
