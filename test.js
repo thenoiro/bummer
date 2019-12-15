@@ -9,7 +9,7 @@ builder()
     // INFO: This module will be available only after 'builder' finished its work.
     // eslint-disable-next-line
     const porter = require('./dist/porter_test.js');
-    log('...running tests...'); return;
+    log('...running tests...');
     tests.forEach((test) => test(porter, getTestSubject()));
   })
   .catch((e) => logError('FAIL. Something went wrong building scripts.\n', e));
