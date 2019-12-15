@@ -1,6 +1,7 @@
 /* Constants */
 const isChild = Boolean(module.parent);
 const env = process.env.NODE_ENV || 'development';
+const dist = 'dist';
 
 /* Dependencies */
 const path = require('path');
@@ -25,6 +26,7 @@ function configBuilder(en = 'development') {
       path: path.resolve(__dirname, dist),
       filename: `porter${postfix}.js`,
       library: 'porter',
+      libraryExport: 'default',
       libraryTarget: 'umd',
       globalObject: `(function() {
         if (typeof self !== 'undefined') {
