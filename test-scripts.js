@@ -390,12 +390,15 @@ requestsSimple.forEach((path) => {
       ? `[${joinSplittedPath(path)}]`
       : `'${path}'`;
 
+    // Property which ended with '.13' doesn't exist
+    const existed = pathStringRepresentation.indexOf('.13') === -1;
+
     logResults(
       'Porter.check: Should return <true> for existing property.',
       `porter.check(targetObject, ${pathStringRepresentation})`,
       testLauncher(
         () => porter.check(target, path),
-        (v) => v === true,
+        (v) => v === existed,
       ),
     );
   });
