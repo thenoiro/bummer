@@ -36,5 +36,14 @@ module.exports = {
             // https://www.npmjs.com/package/eslint-config-airbnb-base
             'airbnb-base',
         ],
+        rules: {
+            'max-len': ['error', 100, 2, {
+                ignoreUrls: true,
+                ignoreComments: false,
+                ignoreRegExpLiterals: true,
+                ignoreStrings: false,
+                ignoreTemplateLiterals: true,
+            }]
+        },
     }],
 };
