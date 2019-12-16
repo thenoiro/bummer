@@ -19,16 +19,60 @@ const tests = [];
 const FAIL = 'FAIL';
 const SUCCESS = 'SUCCESS';
 const has = (object, property) => Object.prototype.hasOwnProperty.call(object, property);
+const hhgg = () => "The Hitchhiker's Guide to te Galaxy";
 
 const summary = {
   [FAIL]: 0,
   [SUCCESS]: 0,
+  errors: 0,
 };
-const requests = [
+const requestsSimple = [
   'games.Half-Life',
   'games[Half-Life]',
   "games['Half-Life']",
+  'games["Half-Life"]',
 ];
+const requestsArrayProperties = [
+  `books.${hhgg()}.0.name`,
+  `books.${hhgg()}[0].name`,
+  `books.${hhgg()}['0'].name`,
+  `books.${hhgg()}["0"].name`,
+  // `books.${hhgg()}.[0].name`,
+  // `books.${hhgg()}.'0'.name`,
+];
+const requestsArrayNonStandardProperties = [
+  `books.${hhgg()}.info.name`,
+  `books.${hhgg()}.13`,
+  `books.${hhgg()}.42.`,
+];
+const requestsNullableProperties = [
+  `books.${hhgg()}.2.read`,
+  `books.${hhgg()}.3.read`,
+  `books.${hhgg()}.5.year`,
+  'games.Half-Life.4',
+];
+const requestsByMixedType = [
+  ['games', 'Half-Life', '0', 'year'],
+  ['games.Half-Life', '0.year'],
+  ['games.Half-Life', '[0].year'],
+  ['games.Half-Life', "['0'].year"],
+  ['games.Half-Life', 0, 'year'],
+];
+const requestsInfinityValue = [
+  ['books', hhgg(), Infinity, 'name'],
+];
+
+const joinSplittedPath = (pathArray) => {
+  const slices = pathArray.map((p) => {
+    const stringSlice = String(p);
+
+    if (stringSlice.indexOf("'") === -1) {
+      return `'${stringSlice}'`;
+    }
+    return `"${stringSlice}"`;
+  });
+  return slices.join(', ');
+};
 
 /**
  * Log test meta and results
@@ -61,13 +105,17 @@ const testLauncher = (executor, moderator) => {
     }
   } catch (ex) {
     logError(ex);
+    summary.errors += 1;
   }
   summary[result] += 1;
   return result;
 };
 
-/** Test porter.get(object, path) */
-requests.forEach((path) => {
+
+/** GET */
+
+/** porter.get(object, path) */
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.get: Should return the value by simple path.',
@@ -79,9 +127,98 @@ requests.forEach((path) => {
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter, target) => {
+    const message = (
+      'Porter.get: Should return an array property by index in different representations '
+      + '(string, number, etc).'
+    );
+    logResults(
+      message,
+      `porter.get(testSubject, '${path}')`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => v === target.books[hhgg()][0].name,
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const middleNode = target.books[hhgg()];
 
-/** Test porter(object).get(path) */
-requests.forEach((path) => {
+    logResults(
+      'Porter.get: Should return an array non-index property successfully.',
+      `porter.get(testSubject, ${path})`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => {
+          switch (i) {
+            case 0: return v === middleNode.info.name;
+            case 1: return v === undefined;
+            case 2: return v === middleNode[42];
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsNullableProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.get: Should return nullable values (undefined, NaN, null) successfully.',
+      `porter.get(testSubject, ${path})`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => {
+          switch (i) {
+            case 0: return v === false;
+            case 1: return v === null;
+            case 2: return Number.isNaN(v);
+            case 3: return v === undefined;
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter, target) => {
+    const message = (
+      'Porter.get: Should return values successfully by the array of path pieces (which presented'
+      + 'as strings or numbers)'
+    );
+    logResults(
+      message,
+      `porter.get(testSubject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => v === target.games['Half-Life'][0].year,
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter, target) => {
+    const message = (
+      'Porter.get: Should return value by an array of path pieces, which contains Infinit value as'
+      + ' an object key'
+    );
+    logResults(
+      message,
+      `porter.get(testSubject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.get(target, path),
+        (v) => v === target.books[hhgg()][Infinity].name,
+      ),
+    );
+  });
+});
+
+/** porter(object).get(path) */
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.get: Should return the value by simple path.',
@@ -94,8 +231,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** SET */
+
 /** Test porter.set(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -104,15 +244,86 @@ requests.forEach((path) => {
       'Porter.set: Should set the value by non-existing path, and return the <true> value.',
       `porter.set({}, '${path}', value)`,
       testLauncher(
-        () => porter.set(target, path),
+        () => porter.set(target, path, settedValue),
         (v) => v === true && target.games['Half-Life'] === settedValue,
       ),
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const settedValue = Symbol('Value');
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${path}', value)`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => v === true && target.books[hhgg()][0].name === settedValue,
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter/* , target */) => {
+    const target = {};
+    const settedValue = Symbol('Value');
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${path}', value)`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => {
+          const success = v === true;
+          const middleNode = target.books[hhgg()];
+
+          switch (i) {
+            case 0: return success && middleNode.info.name === settedValue;
+            case 1: return success && middleNode[13] === settedValue;
+            case 2: return success && middleNode[42] === settedValue;
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const settedValue = Symbol('Value');
+    const target = {};
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${joinSplittedPath(path)}', value)`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => v === true && v === target.games['Half-Life'][0].year,
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter/* , target */) => {
+    const settedValue = Symbol('Value');
+    const target = {};
+
+    logResults(
+      'Porter.set: Should set the value by non-existing path, and return the <true> value.',
+      `porter.set({}, '${joinSplittedPath})', value`,
+      testLauncher(
+        () => porter.set(target, path, settedValue),
+        (v) => v === true && target.books[hhgg()][Infinity].name === settedValue,
+      ),
+    );
+  });
+});
+
 
 /** Test porter(object).set(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -121,7 +332,7 @@ requests.forEach((path) => {
       'Porter.set: Should set the value by non-existing path, and return the <true> value.',
       `porter({}).set('${path}', value)`,
       testLauncher(
-        () => porter(target).set(path),
+        () => porter(target).set(path, settedValue),
         (v) => v === true && target.games['Half-Life'] === settedValue,
       ),
     );
@@ -129,7 +340,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.set(object, path, value, false) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -146,7 +357,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).set(path, value, false) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const settedValue = Symbol('Value');
@@ -162,20 +373,39 @@ requests.forEach((path) => {
   });
 });
 
+
+/** CHECK */
+
 /** Test porter.check(object, path) */
-requests.forEach((path) => {
+[
+  ...requestsSimple,
+  ...requestsArrayProperties,
+  ...requestsArrayNonStandardProperties,
+  ...requestsNullableProperties,
+  ...requestsByMixedType,
+  ...requestsInfinityValue,
+].forEach((path) => {
   tests.push((porter, target) => {
+    const pathStringRepresentation = Array.isArray(path)
+      ? `[${joinSplittedPath(path)}]`
+      : `'${path}'`;
+
+    // Property which ended with '.13' doesn't exist
+    const existed = pathStringRepresentation.indexOf('.13') === -1;
+
     logResults(
       'Porter.check: Should return <true> for existing property.',
-      `porter.check(targetObject, '${path}')`,
+      `porter.check(targetObject, ${pathStringRepresentation})`,
       testLauncher(
         () => porter.check(target, path),
-        (v) => v === true,
+        (v) => v === existed,
       ),
     );
   });
 });
-requests.forEach((path) => {
+
+/** Test porter.check(object, path) */
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     logResults(
       'Porter.check: Should return <false> for non-existing property.',
@@ -189,7 +419,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).check(path) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.check: Should return <true> for existing property.',
@@ -203,7 +433,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).check(path) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     logResults(
       'Porter.check: Should return <false> for non-existing property.',
@@ -216,8 +446,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** REMOVE */
+
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.remove: Should delete a property by the path and return the <true> value (success)',
@@ -229,9 +462,92 @@ requests.forEach((path) => {
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.books[hhgg()][0], 'name'),
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const middleNode = target.books[hhgg()];
+
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => {
+          const result = v === true;
+
+          switch (i) {
+            case 0: return result && !has(middleNode.info, 'name');
+            case 1: return !result;
+            case 2: return result && !has(middleNode, '42');
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsNullableProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const middleNode = target.books[hhgg()];
+
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => {
+          const result = v === true;
+
+          switch (i) {
+            case 0: return result && !has(middleNode[2], 'read');
+            case 1: return result && !has(middleNode[3], 'read');
+            case 2: return result && !has(middleNode[5], 'year');
+            case 3: return result && !has(target.games['Half-Life'], '4');
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.games['Half-Life'][0], 'year'),
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.books[hhgg()][Infinity], 'name'),
+      ),
+    );
+  });
+});
 
 /** Test porter(object).remove(path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     logResults(
       'Porter.remove: Should delete a property by the path and return the <true> value (success)',
@@ -245,7 +561,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path '
@@ -263,7 +579,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).remove(path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path '
@@ -282,7 +598,7 @@ requests.forEach((path) => {
 
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const targetValue = target.games['Half-Life'];
 
@@ -298,7 +614,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).remove(path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const targetValue = target.games['Half-Life'];
 
@@ -314,7 +630,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path and return the '
@@ -332,7 +648,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.remove(object, path, pop) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const message = (
       'Porter.remove: Should try to delete a property by the non-existing path and return the '
@@ -349,8 +665,11 @@ requests.forEach((path) => {
   });
 });
 
+
+/** REPLACE */
+
 /** Test porter.replace(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const value = Symbol('Value');
     const previousValue = target.games['Half-Life'];
@@ -369,9 +688,133 @@ requests.forEach((path) => {
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()][0];
+    const previousValue = middleNode.name;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && middleNode.name !== previousValue
+          && middleNode.name === value
+        ),
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()];
+    const previousValue = (() => {
+      switch (i) {
+        case 0: return middleNode.info.name;
+        case 1: return middleNode[13];
+        case 2: return middleNode[42];
+        default: return undefined;
+      }
+    })();
+    const comparer = (val, prev, cur) => val === prev && cur !== prev && cur !== value;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => {
+          switch (i) {
+            case 0: return comparer(v, previousValue, middleNode.info.name);
+            case 1: return comparer(v, previousValue, middleNode[13]);
+            case 2: return comparer(v, previousValue, middleNode[42]);
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsNullableProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()];
+    const comparer = (val, prev, cur) => val === prev && cur !== prev && cur !== value;
+    const previousValue = (() => {
+      switch (i) {
+        case 0: return middleNode[2].read;
+        case 1: return middleNode[3].read;
+        case 2: return middleNode[5].year;
+        case 3: return target.games['Half-Life'][4];
+        default: return undefined;
+      }
+    })();
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => {
+          switch (i) {
+            case 0: return comparer(v, previousValue, middleNode[2].read);
+            case 1: return comparer(v, previousValue, middleNode[3].read);
+            case 2: return comparer(v, previousValue, middleNode[5].year);
+            case 3: return comparer(v, previousValue, target.games['Half-Life'][4]);
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.games['Half-Life'][0];
+    const previousValue = middleNode.year;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, [${joinSplittedPath(path)}], value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && middleNode.year !== previousValue
+          && middleNode.year !== value
+        ),
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()][Infinity];
+    const previousValue = middleNode.name;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, [${joinSplittedPath(path)}], value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && middleNode.name !== previousValue
+          && middleNode.name !== value
+        ),
+      ),
+    );
+  });
+});
 
 /** Test porter(object).replace(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter, target) => {
     const value = Symbol('Value');
     const previousValue = target.games['Half-Life'];
@@ -392,7 +835,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.replace(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -413,7 +856,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).replace(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -434,7 +877,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter.replace(object, path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -454,7 +897,7 @@ requests.forEach((path) => {
 });
 
 /** Test porter(object).replace(path, value) */
-requests.forEach((path) => {
+requestsSimple.forEach((path) => {
   tests.push((porter/* , target */) => {
     const target = {};
     const value = Symbol('Value');
@@ -474,13 +917,16 @@ requests.forEach((path) => {
 });
 
 
+/** SPECIAL */
+
 /** Summary */
 tests.push((/* porter, target */) => {
   log(
     'SUMMARY:\n',
     `> Total: ${testCounter}\n`,
     `> Success: ${summary[SUCCESS]}\n`,
-    `> Fails: ${summary[FAIL]}`,
+    `> Fails: ${summary[FAIL]}\n`,
+    `>> Errors: ${summary.errors}`,
   );
 });
 
