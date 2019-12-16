@@ -688,6 +688,130 @@ requestsSimple.forEach((path) => {
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()][0];
+    const previousValue = middleNode.name;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && middleNode.name !== previousValue
+          && middleNode.name === value
+        ),
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()];
+    const previousValue = (() => {
+      switch (i) {
+        case 0: return middleNode.info.name;
+        case 1: return middleNode[13];
+        case 2: return middleNode[42];
+        default: return undefined;
+      }
+    })();
+    const comparer = (val, prev, cur) => val === prev && cur !== prev && cur !== value;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => {
+          switch (i) {
+            case 0: return comparer(v, previousValue, middleNode.info.name);
+            case 1: return comparer(v, previousValue, middleNode[13]);
+            case 2: return comparer(v, previousValue, middleNode[42]);
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsNullableProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()];
+    const comparer = (val, prev, cur) => val === prev && cur !== prev && cur !== value;
+    const previousValue = (() => {
+      switch (i) {
+        case 0: return middleNode[2].read;
+        case 1: return middleNode[3].read;
+        case 2: return middleNode[5].year;
+        case 3: return target.games['Half-Life'][4];
+        default: return undefined;
+      }
+    })();
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, '${path}', value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => {
+          switch (i) {
+            case 0: return comparer(v, previousValue, middleNode[2].read);
+            case 1: return comparer(v, previousValue, middleNode[3].read);
+            case 2: return comparer(v, previousValue, middleNode[5].year);
+            case 3: return comparer(v, previousValue, target.games['Half-Life'][4]);
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.games['Half-Life'][0];
+    const previousValue = middleNode.year;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, [${joinSplittedPath(path)}], value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && middleNode.year !== previousValue
+          && middleNode.year !== value
+        ),
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter, target) => {
+    const value = Symbol('Value');
+    const middleNode = target.books[hhgg()][Infinity];
+    const previousValue = middleNode.name;
+
+    logResults(
+      'Porter.replace: Should replace the property value by the existing path with the new value',
+      `porter.replace(targetObject, [${joinSplittedPath(path)}], value)`,
+      testLauncher(
+        () => porter.replace(target, path, value),
+        (v) => (
+          v === previousValue
+          && middleNode.name !== previousValue
+          && middleNode.name !== value
+        ),
+      ),
+    );
+  });
+});
 
 /** Test porter(object).replace(path, value) */
 requestsSimple.forEach((path) => {
