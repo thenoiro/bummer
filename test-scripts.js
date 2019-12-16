@@ -462,6 +462,89 @@ requestsSimple.forEach((path) => {
     );
   });
 });
+requestsArrayProperties.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.books[hhgg()][0], 'name'),
+      ),
+    );
+  });
+});
+requestsArrayNonStandardProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const middleNode = target.books[hhgg()];
+
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => {
+          const result = v === true;
+
+          switch (i) {
+            case 0: return result && !has(middleNode.info, 'name');
+            case 1: return !result;
+            case 2: return result && !has(middleNode, '42');
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsNullableProperties.forEach((path, i) => {
+  tests.push((porter, target) => {
+    const middleNode = target.books[hhgg()];
+
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, '${path}')`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => {
+          const result = v === true;
+
+          switch (i) {
+            case 0: return result && !has(middleNode[2], 'read');
+            case 1: return result && !has(middleNode[3], 'read');
+            case 2: return result && !has(middleNode[5], 'year');
+            case 3: return result && !has(target.games['Half-Life'], '4');
+            default: return false;
+          }
+        },
+      ),
+    );
+  });
+});
+requestsByMixedType.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.games['Half-Life'][0], 'year'),
+      ),
+    );
+  });
+});
+requestsInfinityValue.forEach((path) => {
+  tests.push((porter, target) => {
+    logResults(
+      'Porter.remove: Should delete a property by the path and return the <true> value (success)',
+      `porter.remove(targetObject, [${joinSplittedPath(path)}])`,
+      testLauncher(
+        () => porter.remove(target, path),
+        (v) => v === true && !has(target.books[hhgg()][Infinity], 'name'),
+      ),
+    );
+  });
+});
 
 /** Test porter(object).remove(path, pop) */
 requestsSimple.forEach((path) => {
