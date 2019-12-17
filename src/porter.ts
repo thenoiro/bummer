@@ -74,27 +74,11 @@ const porter: PorterAPI = (subject) => {
     replace: wrapper.replace,
   };
 };
-
-porter.get = (subject, path) => {
-  log(subject, path);
-  return undefined;
-};
-porter.set = (subject, path, value, force = true) => {
-  log(subject, path, value, force);
-  return false;
-};
-porter.check = (subject, path) => {
-  log(subject, path);
-  return false;
-};
-porter.remove = (subject, path, pop = false) => {
-  log(subject, path, pop);
-  return pop ? undefined : false;
-};
-porter.replace = (subject, path, value, force = true) => {
-  log(subject, path, value, force);
-  return undefined;
-};
+porter.get = (subject, ...options) => porter(subject).get(...options);
+porter.set = (subject, ...options) => porter(subject).set(...options);
+porter.check = (subject, ...options) => porter(subject).check(...options);
+porter.remove = (subject, ...options) => porter(subject).remove(...options);
+porter.replace = (subject, ...options) => porter(subject).replace(...options);
 
 
 export default porter;
