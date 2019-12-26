@@ -1,7 +1,7 @@
+type PathKey = string | symbol | number;
+
 export type Subject = object;
-export type Path = string;
-export type PathKey = string | symbol | number;
-export type AnyPath = Path | PathKey[];
+export type AnyPath = PathKey | PathKey[];
 export type Value = any;
 export type Result = boolean;
 export type Flag = boolean;
@@ -22,4 +22,8 @@ export interface PorterWrapper {
   check(path: any): Result;
   remove(path: any, pop?: any): Result | Value;
   replace(path: any, value: any, force?: any): Value;
+}
+export interface ResultContainer {
+  done: Result;
+  value: Value;
 }
