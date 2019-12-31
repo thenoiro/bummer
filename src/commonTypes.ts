@@ -23,7 +23,3 @@ export interface PorterWrapper {
   remove(path: any, pop?: any): Result | Value;
   replace(path: any, value: any, force?: any): Value;
 }
-export interface ResultContainer {
-  done: Result;
-  value: Value;
-}
