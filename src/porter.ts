@@ -1,100 +1,145 @@
-type Subject = object;
-type Path = string;
-type PathKey = string | symbol | number;
-type AnyPath = Path | PathKey[];
-type Value = any;
-type Result = boolean;
-type Flag = boolean;
+import Porter from './porterClass';
+import { inform } from './logger';
+import { isObject } from './commonMethods';
+import {
+  AnyPath,
+  Subject,
+  PorterAPI,
+} from './commonTypes';
 
-interface PorterAPIMethods {
-  get(subject: Subject, path: AnyPath): Value;
-  set(subject: Subject, path: AnyPath, value: Value, force?: Flag): Result;
-  check(subject: Subject, path: AnyPath): Result;
-  remove(subject: Subject, path: AnyPath, pop?: Flag): Result | Value;
-  replace(subject: Subject, path: AnyPath, value: Value, force: Flag): Value;
-}
-interface PorterAPI extends PorterAPIMethods {
-  (subject: Subject): PorterWrapper;
-}
-interface PorterWrapper {
-  get(path: AnyPath): Value;
-  set(path: AnyPath, value: Value, force?: Flag): Result;
-  check(path: AnyPath): Result;
-  remove(path: AnyPath, pop?: Flag): Result | Value;
-  replace(path: AnyPath, value: Value, force: Flag): Value;
-}
 
-const inform = console;
-const log = (...args: any) => {
-  inform.log(...args);
+// Validators
+const validatePath = (path: any): path is AnyPath => {
+  if (typeof path === 'string') {
+    return true;
+  }
+  if (typeof path === 'symbol') {
+    return true;
+  }
+  if (Array.isArray(path) && path.length > 0) {
+    return path.every(validatePath);
+  }
+  return false;
+};
+const validateSubject = (subject: any): subject is Subject => isObject(subject);
+
+
+// Errors
+const ERRORS = {
+  PATH: 'Wrong path.',
+  SUBJECT: 'Wrong subject.',
 };
 
 
-class Porter implements PorterWrapper {
-  private subject: Subject;
-
-  constructor(subject: Subject) {
-    this.subject = subject;
-  }
-
-  get(path: AnyPath) {
-    log(path, this.subject);
-    return undefined;
-  }
-
-  set(path: AnyPath, value: Value, force: Flag = true) {
-    log(this.subject, path, value, force);
-    return false;
-  }
-
-  check(path: AnyPath) {
-    log(this.subject, path);
-    return false;
-  }
-
-  remove(path: AnyPath, pop: Flag = false) {
-    log(this.subject, path, pop);
-    return pop ? undefined : false;
-  }
-
-  replace(path: AnyPath, value: Value, force = true) {
-    log(this.subject, path, value, force);
-    return undefined;
-  }
-}
-
-const porter: PorterAPI = (subject) => {
+// Entry point
+const porter: PorterAPI = (subject: any) => {
+  const isValidSubject = validateSubject(subject);
   const wrapper = new Porter(subject);
 
   return {
-    get: wrapper.get,
-    set: wrapper.set,
-    check: wrapper.check,
-    remove: wrapper.remove,
-    replace: wrapper.replace,
+    get(path) {
+      let isError = false;
+      let result;
+      const isValidPath = validatePath(path);
+
+      if (!isValidSubject) {
+        inform.error(ERRORS.SUBJECT);
+        isError = true;
+      }
+      if (!isValidPath) {
+        inform.error(ERRORS.PATH);
+        isError = true;
+      }
+      if (!isError) {
+        result = wrapper.get(path);
+      }
+      return result;
+    },
+
+    set(path, value, force = true) {
+      let result = false;
+      let isError = false;
+      const isValidPath = validatePath(path);
+
+      if (!isValidSubject) {
+        inform.error(ERRORS.SUBJECT);
+        isError = true;
+      }
+      if (!isValidPath) {
+        inform.error(ERRORS.PATH);
+        isError = true;
+      }
+      if (!isError) {
+        result = wrapper.set(path, value, force);
+      }
+      return result;
+    },
+
+    check(path) {
+      let result = false;
+      let isError = false;
+      const isValidPath = validatePath(path);
+
+      if (!isValidSubject) {
+        inform.error(ERRORS.SUBJECT);
+        isError = true;
+      }
+      if (!isValidPath) {
+        inform.error(ERRORS.PATH);
+        isError = true;
+      }
+      if (!isError) {
+        result = wrapper.check(path);
+      }
+      return result;
+    },
+
+    remove(path, pop = false) {
+      let result;
+      let isError = false;
+      const isValidPath = validatePath(path);
+
+      if (!isValidSubject) {
+        inform.error(ERRORS.SUBJECT);
+        isError = true;
+      }
+      if (!isValidPath) {
+        inform.error(ERRORS.PATH);
+        isError = true;
+      }
+      if (!isError) {
+        result = wrapper.remove(path, pop);
+      } else if (!pop) {
+        result = false;
+      }
+      return result;
+    },
+
+    replace(path, value, force = true) {
+      let result;
+      let isError = false;
+      const isValidPath = validatePath(path);
+
+      if (!isValidSubject) {
+        inform.error(ERRORS.SUBJECT);
+        isError = true;
+      }
+      if (!isValidPath) {
+        inform.error(ERRORS.PATH);
+        isError = true;
+      }
+      if (!isError) {
+        result = wrapper.replace(path, value, force);
+      }
+      return result;
+    },
   };
 };
-
-porter.get = (subject, path) => {
-  log(subject, path);
-  return undefined;
-};
-porter.set = (subject, path, value, force = true) => {
-  log(subject, path, value, force);
-  return false;
-};
-porter.check = (subject, path) => {
-  log(subject, path);
-  return false;
-};
-porter.remove = (subject, path, pop = false) => {
-  log(subject, path, pop);
-  return pop ? undefined : false;
-};
-porter.replace = (subject, path, value, force = true) => {
-  log(subject, path, value, force);
-  return undefined;
-};
+porter.get = (subject, ...options) => porter(subject).get(...options);
+porter.set = (subject, ...options) => porter(subject).set(...options);
+porter.check = (subject, ...options) => porter(subject).check(...options);
+porter.remove = (subject, ...options) => porter(subject).remove(...options);
+porter.replace = (subject, ...options) => porter(subject).replace(...options);
 
 
 export default porter;
