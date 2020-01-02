@@ -1,4 +1,7 @@
-export type PathKey = string | symbol | number;
+export type PathKeyString = string;
+export type PathKeyNumber = number;
+export type PathKeySymbol = symbol;
+export type PathKey = PathKeyString | PathKeyNumber | PathKeySymbol;
 
 export type Subject = object;
 export type AnyPath = PathKey | PathKey[];

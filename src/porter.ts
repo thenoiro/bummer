@@ -11,11 +11,11 @@ const porter: PorterAPI = (subject: Subject) => {
   const wrapper = new Porter(subject);
 
   return {
-    get: wrapper.get.bind(wrapper),
-    set: wrapper.set.bind(wrapper),
-    check: wrapper.check.bind(wrapper),
-    remove: wrapper.remove.bind(wrapper),
-    replace: wrapper.replace.bind(wrapper),
+    get: wrapper.get,
+    set: wrapper.set,
+    check: wrapper.check,
+    remove: wrapper.remove,
+    replace: wrapper.replace,
   };
 };
 porter.get = (subject, ...options) => porter(subject).get(...options);

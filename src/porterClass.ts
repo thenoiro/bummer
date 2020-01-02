@@ -1,4 +1,5 @@
 import PorterResult from './porterResultClass';
+import reducePath from './pathReducer';
 import { inform } from './logger';
 import { isObject } from './commonMethods';
 import {
@@ -39,11 +40,18 @@ class Porter implements PorterClassInterface {
   private result: PorterResultInterface = new PorterResult();
 
   constructor(subject: Subject) {
+    this.get = this.get.bind(this);
+    this.set = this.set.bind(this);
+    this.check = this.check.bind(this);
+    this.remove = this.remove.bind(this);
+    this.replace = this.replace.bind(this);
+
     this.subject = subject;
     const isValidSubject = validateSubject(subject);
 
     if (!isValidSubject) {
       this.result.errors.push(ERRORS.SUBJECT);
+      this.subject = {};
     }
   }
 
@@ -51,7 +59,8 @@ class Porter implements PorterClassInterface {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
-      inform.log(path, this.subject);
+      const pathDetails = reducePath(path);
+      inform.log(path, this.subject, pathDetails);
     }
     return this.result;
   }
