@@ -4,49 +4,61 @@ const isPathKeyString = (key: any): key is PathKeyString => typeof key === 'stri
 
 const splitStringKey = (pathKey: PathKeyString): PathKeyString[] => {
   const result: PathKeyString[] = [];
-  let pathKeyBillet = pathKey;
+  let pathKeyBillet: string = pathKey;
   let safeCounter: number = pathKey.length;
 
   while (safeCounter > 0) {
-    const dotIndex = pathKeyBillet.indexOf('.');
-    const bktOpenIndex = pathKeyBillet.indexOf('[');
+    const dotIndex: number = pathKeyBillet.indexOf('.');
+    const bktOpenIndex: number = pathKeyBillet.indexOf('[');
+
+    const isDot: boolean = dotIndex > -1;
+    const isBkt: boolean = bktOpenIndex > -1;
+    const noMatch: boolean = !isDot && !isBkt;
     // TODO: Implement error output when safeCounter couse the cycle ending
     safeCounter -= 1;
 
-    if (dotIndex === -1 && bktOpenIndex === -1) {
+    if (noMatch) {
       // No more delimiters
       if (pathKeyBillet.length > 0) {
         result.push(pathKeyBillet);
       }
       break;
     }
-    if (dotIndex > -1 && (dotIndex < bktOpenIndex || bktOpenIndex === -1)) {
-      // Dot goes first
+    const dotGoesNext: boolean = isDot && (!isBkt || dotIndex < bktOpenIndex);
+    const bktGoesNext: boolean = !dotGoesNext;
+
+    if (dotGoesNext) {
       if (dotIndex === 0) {
         // TODO: Dot can't be at the 0 position. Double dot error, or something else.
         pathKeyBillet = pathKeyBillet.slice(1);
       } else {
-        const partKey = pathKeyBillet.slice(0, dotIndex);
-        result.push(partKey);
+        const partKey: string = pathKeyBillet.slice(0, dotIndex);
         pathKeyBillet = pathKeyBillet.slice(dotIndex + 1);
+        result.push(partKey);
       }
-    } else if (bktOpenIndex > 0) {
-      // Something before bracket
-      const partKey = pathKeyBillet.slice(0, bktOpenIndex);
-      pathKeyBillet = pathKeyBillet.slice(bktOpenIndex);
-      result.push(partKey);
-    } else {
-      // Start with bracket
-      let bktCloseIndex = pathKeyBillet.indexOf(']', bktOpenIndex + 1);
+    }
 
-      if (bktCloseIndex === -1) {
-        // TODO: Implement close bracket miss error or warning
-        bktCloseIndex = pathKeyBillet.length + 1;
-        pathKeyBillet += ']';
+    if (bktGoesNext) {
+      const keyBeforeBkt: boolean = bktOpenIndex > 0;
+      const keyWithinBkt: boolean = !keyBeforeBkt;
+
+      if (keyBeforeBkt) {
+        const partKey: string = pathKeyBillet.slice(0, bktOpenIndex);
+        pathKeyBillet = pathKeyBillet.slice(bktOpenIndex);
+        result.push(partKey);
       }
-      const partKey = pathKeyBillet.slice(bktOpenIndex + 1, bktCloseIndex);
-      pathKeyBillet = pathKeyBillet.slice(bktCloseIndex + 1);
-      result.push(partKey);
+      if (keyWithinBkt) {
+        let bktCloseIndex: number = pathKeyBillet.indexOf(']', bktOpenIndex + 1);
+
+        if (bktCloseIndex === -1) {
+          // TODO: Implement close bracket miss error or warning
+          bktCloseIndex = pathKeyBillet.length + 1;
+          pathKeyBillet += ']';
+        }
+        const partKey: string = pathKeyBillet.slice(bktOpenIndex + 1, bktCloseIndex);
+        pathKeyBillet = pathKeyBillet.slice(bktCloseIndex + 1);
+        result.push(partKey);
+      }
     }
   }
   return result;

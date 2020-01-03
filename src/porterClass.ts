@@ -20,6 +20,9 @@ const validatePath = (path: any): path is AnyPath => {
   if (typeof path === 'symbol') {
     return true;
   }
+  if (typeof path === 'number') {
+    return true;
+  }
   if (Array.isArray(path) && path.length > 0) {
     return path.every(validatePath);
   }
