@@ -1,34 +1,19 @@
 import PorterResult from './porterResultClass';
 import reducePath from './pathReducer';
+import getSubjectMap from './subjectMapBuilder';
 import { inform } from './logger';
-import { isObject } from './commonMethods';
+import { isPath, isSubject } from './validators';
 import {
+  PathKey,
   Subject,
   AnyPath,
   Value,
   Flag,
   PorterClassInterface,
   PorterResultInterface,
+  SubjectMap,
 } from './commonTypes';
 
-
-// Validators
-const validatePath = (path: any): path is AnyPath => {
-  if (typeof path === 'string' && path.length > 0) {
-    return true;
-  }
-  if (typeof path === 'symbol') {
-    return true;
-  }
-  if (typeof path === 'number') {
-    return true;
-  }
-  if (Array.isArray(path) && path.length > 0) {
-    return path.every(validatePath);
-  }
-  return false;
-};
-const validateSubject = (subject: any): subject is Subject => isObject(subject);
 
 // Errors
 const ERRORS = {
@@ -42,6 +27,7 @@ class Porter implements PorterClassInterface {
 
   private result: PorterResultInterface = new PorterResult();
 
+
   constructor(subject: Subject) {
     this.get = this.get.bind(this);
     this.set = this.set.bind(this);
@@ -50,7 +36,7 @@ class Porter implements PorterClassInterface {
     this.replace = this.replace.bind(this);
 
     this.subject = subject;
-    const isValidSubject = validateSubject(subject);
+    const isValidSubject = isSubject(subject);
 
     if (!isValidSubject) {
       this.result.errors.push(ERRORS.SUBJECT);
@@ -58,12 +44,14 @@ class Porter implements PorterClassInterface {
     }
   }
 
+
   get(this: Porter, path: AnyPath) {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
-      const pathDetails = reducePath(path);
-      inform.log(path, this.subject, pathDetails);
+      const pathDetails: PathKey[] = reducePath(path);
+      const subjectMap: SubjectMap = getSubjectMap(this.subject, pathDetails);
+      inform.log(path, this.subject, subjectMap);
     }
     return this.result;
   }
@@ -72,7 +60,9 @@ class Porter implements PorterClassInterface {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
-      inform.log(this.subject, path, value, force);
+      const pathDetails: PathKey[] = reducePath(path);
+      const subjectMap: SubjectMap = getSubjectMap(this.subject, pathDetails, force);
+      inform.log(value, subjectMap);
     }
     return this.result;
   }
@@ -104,8 +94,9 @@ class Porter implements PorterClassInterface {
     return this.result;
   }
 
+
   private validatePath(path: any): path is AnyPath {
-    const isValidPath = validatePath(path);
+    const isValidPath = isPath(path);
 
     if (!isValidPath) {
       this.result.errors.push(ERRORS.PATH);

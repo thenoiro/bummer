@@ -5,7 +5,7 @@ enum LogType {
   Error,
 }
 
-const develop = true;
+const develop = false;
 const inform = console;
 const forceKey = Symbol('Force Key');
 

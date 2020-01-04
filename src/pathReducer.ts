@@ -2,6 +2,7 @@ import { AnyPath, PathKey, PathKeyString } from './commonTypes';
 
 const isPathKeyString = (key: any): key is PathKeyString => typeof key === 'string';
 
+// TODO: check keys length (could be zero)
 const splitStringKey = (pathKey: PathKeyString): PathKeyString[] => {
   const result: PathKeyString[] = [];
   let pathKeyBillet: string = pathKey;
