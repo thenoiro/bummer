@@ -1,69 +1,12 @@
-type Subject = object;
-type Path = string;
-type PathKey = string | symbol | number;
-type AnyPath = Path | PathKey[];
-type Value = any;
-type Result = boolean;
-type Flag = boolean;
-
-interface PorterAPIMethods {
-  get(subject: Subject, path: AnyPath): Value;
-  set(subject: Subject, path: AnyPath, value: Value, force?: Flag): Result;
-  check(subject: Subject, path: AnyPath): Result;
-  remove(subject: Subject, path: AnyPath, pop?: Flag): Result | Value;
-  replace(subject: Subject, path: AnyPath, value: Value, force: Flag): Value;
-}
-interface PorterAPI extends PorterAPIMethods {
-  (subject: Subject): PorterWrapper;
-}
-interface PorterWrapper {
-  get(path: AnyPath): Value;
-  set(path: AnyPath, value: Value, force?: Flag): Result;
-  check(path: AnyPath): Result;
-  remove(path: AnyPath, pop?: Flag): Result | Value;
-  replace(path: AnyPath, value: Value, force: Flag): Value;
-}
-
-const inform = console;
-const log = (...args: any) => {
-  inform.log(...args);
-};
+import Porter from './porterClass';
+import {
+  Subject,
+  PorterAPI,
+} from './commonTypes';
 
 
-class Porter implements PorterWrapper {
-  private subject: Subject;
-
-  constructor(subject: Subject) {
-    this.subject = subject;
-  }
-
-  get(path: AnyPath) {
-    log(path, this.subject);
-    return undefined;
-  }
-
-  set(path: AnyPath, value: Value, force: Flag = true) {
-    log(this.subject, path, value, force);
-    return false;
-  }
-
-  check(path: AnyPath) {
-    log(this.subject, path);
-    return false;
-  }
-
-  remove(path: AnyPath, pop: Flag = false) {
-    log(this.subject, path, pop);
-    return pop ? undefined : false;
-  }
-
-  replace(path: AnyPath, value: Value, force = true) {
-    log(this.subject, path, value, force);
-    return undefined;
-  }
-}
-
-const porter: PorterAPI = (subject) => {
+// Entry point
+const porter: PorterAPI = (subject: Subject) => {
   const wrapper = new Porter(subject);
 
   return {
@@ -74,27 +17,11 @@ const porter: PorterAPI = (subject) => {
     replace: wrapper.replace,
   };
 };
-
-porter.get = (subject, path) => {
-  log(subject, path);
-  return undefined;
-};
-porter.set = (subject, path, value, force = true) => {
-  log(subject, path, value, force);
-  return false;
-};
-porter.check = (subject, path) => {
-  log(subject, path);
-  return false;
-};
-porter.remove = (subject, path, pop = false) => {
-  log(subject, path, pop);
-  return pop ? undefined : false;
-};
-porter.replace = (subject, path, value, force = true) => {
-  log(subject, path, value, force);
-  return undefined;
-};
+porter.get = (subject, ...options) => porter(subject).get(...options);
+porter.set = (subject, ...options) => porter(subject).set(...options);
+porter.check = (subject, ...options) => porter(subject).check(...options);
+porter.remove = (subject, ...options) => porter(subject).remove(...options);
+porter.replace = (subject, ...options) => porter(subject).replace(...options);
 
 
 export default porter;
