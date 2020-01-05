@@ -1,7 +1,7 @@
 {
   "name": "porter",
   "version": "1.0.0",
-  "description": "Small script which allows easily and safely get, set, remove or check object's properties located at any depth.",
+  "description": "Small script which allows easily and safely get, set, remove, replace or check object's properties located at any depth.",
   "main": "dist/porter.min.js",
   "scripts": {
     "start": "NODE_ENV=production node run.js",

@@ -1,5 +1,4 @@
 import Porter from './porterClass';
-import { inform } from './logger';
 import {
   Subject,
   PorterAPI,
