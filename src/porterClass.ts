@@ -1,7 +1,6 @@
 import PorterResult from './porterResultClass';
 import reducePath from './pathReducer';
 import getSubjectMap from './subjectMapBuilder';
-import { inform } from './logger';
 import { isPath, isSubject } from './validators';
 import {
   PathKey,
@@ -12,6 +11,7 @@ import {
   PorterClassInterface,
   PorterResultInterface,
   SubjectMap,
+  SubjectMapMember,
 } from './commonTypes';
 
 
@@ -51,7 +51,12 @@ class Porter implements PorterClassInterface {
     if (isValidPath) {
       const pathDetails: PathKey[] = reducePath(path);
       const subjectMap: SubjectMap = getSubjectMap(this.subject, pathDetails);
-      inform.log(path, this.subject, subjectMap);
+      this.result.track = subjectMap;
+      this.result.done = subjectMap.every((s) => s.available);
+
+      if (this.result.done) {
+        this.result.value = subjectMap[subjectMap.length - 1].value;
+      }
     }
     return this.result;
   }
@@ -62,34 +67,64 @@ class Porter implements PorterClassInterface {
     if (isValidPath) {
       const pathDetails: PathKey[] = reducePath(path);
       const subjectMap: SubjectMap = getSubjectMap(this.subject, pathDetails, force);
-      inform.log(value, subjectMap);
+      this.result.track = subjectMap;
+      this.result.done = subjectMap.every((s) => s.available);
+
+      if (this.result.done) {
+        const lastMember: SubjectMapMember = subjectMap[subjectMap.length - 1];
+        const { target, key } = lastMember;
+
+        if (isSubject(target)) {
+          target[key as string] = value;
+        }
+      }
     }
     return this.result;
   }
 
   check(this: Porter, path: AnyPath) {
-    const isValidPath = this.validatePath(path);
-
-    if (isValidPath) {
-      inform.log(this.subject, path);
-    }
-    return this.result;
+    const result: PorterResultInterface = this.get(path);
+    result.value = result.done;
+    return result;
   }
 
   remove(this: Porter, path: AnyPath, pop: Flag = false) {
-    const isValidPath = this.validatePath(path);
+    const result: PorterResultInterface = this.get(path);
 
-    if (isValidPath) {
-      inform.log(this.subject, path, pop);
+    if (!pop) {
+      result.value = result.done;
     }
-    return this.result;
+    if (result.done) {
+      const lastMember: SubjectMapMember = result.track[result.track.length - 1];
+      const { target, key } = lastMember;
+
+      if (isSubject(target)) {
+        delete target[key as string];
+      }
+    }
+    return result;
   }
 
   replace(this: Porter, path: AnyPath, value: Value, force = true) {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
-      inform.log(this.subject, path, value, force);
+      const pathDetails: PathKey[] = reducePath(path);
+      const subjectMap: SubjectMap = getSubjectMap(this.subject, pathDetails, force);
+      this.result.track = subjectMap;
+      this.result.done = subjectMap.every((s) => s.available);
+
+      if (this.result.done) {
+        const lastMember: SubjectMapMember = subjectMap[subjectMap.length - 1];
+        const { target, key } = lastMember;
+        const targetKey = key as string;
+
+        if (isSubject(target)) {
+          const prevValue: Value = target[targetKey];
+          target[targetKey] = value;
+          this.result.value = prevValue;
+        }
+      }
     }
     return this.result;
   }

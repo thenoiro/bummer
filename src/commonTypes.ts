@@ -26,8 +26,9 @@ export type SubjectMap = SubjectMapMember[];
 export interface PorterResultInterface {
   done: Result;
   value: Value;
-  track: PathKey[];
+  track: SubjectMapMember[];
   errors: string[];
+  val(): Value;
 }
 
 export interface PorterAPIMethods {

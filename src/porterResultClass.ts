@@ -8,6 +8,15 @@ class PorterResult implements PorterResultInterface {
   done = false;
 
   value: Value;
+
+
+  constructor() {
+    this.val = this.val.bind(this);
+  }
+
+  val(this: PorterResult): Value {
+    return this.value;
+  }
 }
 
 export default PorterResult;
