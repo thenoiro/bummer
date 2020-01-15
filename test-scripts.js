@@ -29,16 +29,10 @@ const summary = {
 const requestsSimple = [
   'games.Half-Life',
   'games[Half-Life]',
-  "games['Half-Life']",
-  'games["Half-Life"]',
 ];
 const requestsArrayProperties = [
   `books.${hhgg()}.0.name`,
   `books.${hhgg()}[0].name`,
-  `books.${hhgg()}['0'].name`,
-  `books.${hhgg()}["0"].name`,
-  // `books.${hhgg()}.[0].name`,
-  // `books.${hhgg()}.'0'.name`,
 ];
 const requestsArrayNonStandardProperties = [
   `books.${hhgg()}.info.name`,
@@ -55,7 +49,6 @@ const requestsByMixedType = [
   ['games', 'Half-Life', '0', 'year'],
   ['games.Half-Life', '0.year'],
   ['games.Half-Life', '[0].year'],
-  ['games.Half-Life', "['0'].year"],
   ['games.Half-Life', 0, 'year'],
 ];
 const requestsInfinityValue = [
@@ -122,7 +115,7 @@ requestsSimple.forEach((path) => {
       `porter.get(testSubject, '${path}')`,
       testLauncher(
         () => porter.get(target, path),
-        (v) => v === target.games['Half-Life'],
+        (v) => v.val() === target.games['Half-Life'],
       ),
     );
   });
@@ -138,7 +131,7 @@ requestsArrayProperties.forEach((path) => {
       `porter.get(testSubject, '${path}')`,
       testLauncher(
         () => porter.get(target, path),
-        (v) => v === target.books[hhgg()][0].name,
+        (v) => v.val() === target.books[hhgg()][0].name,
       ),
     );
   });
@@ -154,9 +147,9 @@ requestsArrayNonStandardProperties.forEach((path, i) => {
         () => porter.get(target, path),
         (v) => {
           switch (i) {
-            case 0: return v === middleNode.info.name;
-            case 1: return v === undefined;
-            case 2: return v === middleNode[42];
+            case 0: return v.val() === middleNode.info.name;
+            case 1: return v.val() === undefined;
+            case 2: return v.val() === middleNode[42];
             default: return false;
           }
         },
@@ -173,10 +166,10 @@ requestsNullableProperties.forEach((path, i) => {
         () => porter.get(target, path),
         (v) => {
           switch (i) {
-            case 0: return v === false;
-            case 1: return v === null;
-            case 2: return Number.isNaN(v);
-            case 3: return v === undefined;
+            case 0: return v.val() === false;
+            case 1: return v.val() === null;
+            case 2: return Number.isNaN(v.val());
+            case 3: return v.val() === undefined;
             default: return false;
           }
         },
@@ -195,7 +188,7 @@ requestsByMixedType.forEach((path) => {
       `porter.get(testSubject, [${joinSplittedPath(path)}])`,
       testLauncher(
         () => porter.get(target, path),
-        (v) => v === target.games['Half-Life'][0].year,
+        (v) => v.val() === target.games['Half-Life'][0].year,
       ),
     );
   });
@@ -211,7 +204,7 @@ requestsInfinityValue.forEach((path) => {
       `porter.get(testSubject, [${joinSplittedPath(path)}])`,
       testLauncher(
         () => porter.get(target, path),
-        (v) => v === target.books[hhgg()][Infinity].name,
+        (v) => v.val() === target.books[hhgg()][Infinity].name,
       ),
     );
   });
@@ -225,7 +218,7 @@ requestsSimple.forEach((path) => {
       `porter.get(testSubject, '${path}')`,
       testLauncher(
         () => porter(target).get(path),
-        (v) => v === target.games['Half-Life'],
+        (v) => v.val() === target.games['Half-Life'],
       ),
     );
   });
@@ -245,7 +238,7 @@ requestsSimple.forEach((path) => {
       `porter.set({}, '${path}', value)`,
       testLauncher(
         () => porter.set(target, path, settedValue),
-        (v) => v === true && target.games['Half-Life'] === settedValue,
+        (v) => v.val() === true && target.games['Half-Life'] === settedValue,
       ),
     );
   });
@@ -260,7 +253,7 @@ requestsArrayProperties.forEach((path) => {
       `porter.set({}, '${path}', value)`,
       testLauncher(
         () => porter.set(target, path, settedValue),
-        (v) => v === true && target.books[hhgg()][0].name === settedValue,
+        (v) => v.val() === true && target.books[hhgg()][0].name === settedValue,
       ),
     );
   });
@@ -276,7 +269,7 @@ requestsArrayNonStandardProperties.forEach((path, i) => {
       testLauncher(
         () => porter.set(target, path, settedValue),
         (v) => {
-          const success = v === true;
+          const success = v.val() === true;
           const middleNode = target.books[hhgg()];
 
           switch (i) {
@@ -300,7 +293,7 @@ requestsByMixedType.forEach((path) => {
       `porter.set({}, '${joinSplittedPath(path)}', value)`,
       testLauncher(
         () => porter.set(target, path, settedValue),
-        (v) => v === true && v === target.games['Half-Life'][0].year,
+        (v) => v.val() === true && settedValue === target.games['Half-Life'][0].year,
       ),
     );
   });
@@ -315,7 +308,7 @@ requestsInfinityValue.forEach((path) => {
       `porter.set({}, '${joinSplittedPath})', value`,
       testLauncher(
         () => porter.set(target, path, settedValue),
-        (v) => v === true && target.books[hhgg()][Infinity].name === settedValue,
+        (v) => v.val() === true && target.books[hhgg()][Infinity].name === settedValue,
       ),
     );
   });
@@ -333,7 +326,7 @@ requestsSimple.forEach((path) => {
       `porter({}).set('${path}', value)`,
       testLauncher(
         () => porter(target).set(path, settedValue),
-        (v) => v === true && target.games['Half-Life'] === settedValue,
+        (v) => v.val() === true && target.games['Half-Life'] === settedValue,
       ),
     );
   });
@@ -350,7 +343,7 @@ requestsSimple.forEach((path) => {
       `porter.set({}, '${path}', value, false)`,
       testLauncher(
         () => porter.set(target, path, settedValue, false),
-        (v) => v === false && !has(target, 'games'),
+        (v) => v.val() === false && !has(target, 'games'),
       ),
     );
   });
@@ -367,7 +360,7 @@ requestsSimple.forEach((path) => {
       `porter({}).set('${path}', value, false)`,
       testLauncher(
         () => porter(target).set(path, settedValue, false),
-        (v) => v === false && !has(target, 'games'),
+        (v) => v.val() === false && !has(target, 'games'),
       ),
     );
   });
@@ -398,7 +391,7 @@ requestsSimple.forEach((path) => {
       `porter.check(targetObject, ${pathStringRepresentation})`,
       testLauncher(
         () => porter.check(target, path),
-        (v) => v === existed,
+        (v) => v.val() === existed,
       ),
     );
   });
@@ -412,7 +405,7 @@ requestsSimple.forEach((path) => {
       `porter.check({}, '${path}')`,
       testLauncher(
         () => porter.check({}, path),
-        (v) => v === false,
+        (v) => v.val() === false,
       ),
     );
   });
@@ -426,7 +419,7 @@ requestsSimple.forEach((path) => {
       `porter(targetObject).check('${path}')`,
       testLauncher(
         () => porter.check(target, path),
-        (v) => v === true,
+        (v) => v.val() === true,
       ),
     );
   });
@@ -440,7 +433,7 @@ requestsSimple.forEach((path) => {
       `porter({}).check('${path}')`,
       testLauncher(
         () => porter.check({}, path),
-        (v) => v === false,
+        (v) => v.val() === false,
       ),
     );
   });
@@ -457,7 +450,7 @@ requestsSimple.forEach((path) => {
       `porter.remove(targetObject, '${path}')`,
       testLauncher(
         () => porter.remove(target, path),
-        (v) => v === true && !has(target.games, 'Half-Life'),
+        (v) => v.val() === true && !has(target.games, 'Half-Life'),
       ),
     );
   });
@@ -469,7 +462,7 @@ requestsArrayProperties.forEach((path) => {
       `porter.remove(targetObject, '${path}')`,
       testLauncher(
         () => porter.remove(target, path),
-        (v) => v === true && !has(target.books[hhgg()][0], 'name'),
+        (v) => v.val() === true && !has(target.books[hhgg()][0], 'name'),
       ),
     );
   });
@@ -484,7 +477,7 @@ requestsArrayNonStandardProperties.forEach((path, i) => {
       testLauncher(
         () => porter.remove(target, path),
         (v) => {
-          const result = v === true;
+          const result = v.val() === true;
 
           switch (i) {
             case 0: return result && !has(middleNode.info, 'name');
@@ -507,7 +500,7 @@ requestsNullableProperties.forEach((path, i) => {
       testLauncher(
         () => porter.remove(target, path),
         (v) => {
-          const result = v === true;
+          const result = v.val() === true;
 
           switch (i) {
             case 0: return result && !has(middleNode[2], 'read');
@@ -528,7 +521,7 @@ requestsByMixedType.forEach((path) => {
       `porter.remove(targetObject, [${joinSplittedPath(path)}])`,
       testLauncher(
         () => porter.remove(target, path),
-        (v) => v === true && !has(target.games['Half-Life'][0], 'year'),
+        (v) => v.val() === true && !has(target.games['Half-Life'][0], 'year'),
       ),
     );
   });
@@ -540,7 +533,7 @@ requestsInfinityValue.forEach((path) => {
       `porter.remove(targetObject, [${joinSplittedPath(path)}])`,
       testLauncher(
         () => porter.remove(target, path),
-        (v) => v === true && !has(target.books[hhgg()][Infinity], 'name'),
+        (v) => v.val() === true && !has(target.books[hhgg()][Infinity], 'name'),
       ),
     );
   });
@@ -554,7 +547,7 @@ requestsSimple.forEach((path) => {
       `porter(targetObject).remove('${path}')`,
       testLauncher(
         () => porter(target).remove(path),
-        (v) => v === true && !has(target.games, 'Half-Life'),
+        (v) => v.val() === true && !has(target.games, 'Half-Life'),
       ),
     );
   });
@@ -572,7 +565,7 @@ requestsSimple.forEach((path) => {
       `porter.remove({}, '${path}')`,
       testLauncher(
         () => porter.remove({}, path),
-        (v) => v === false,
+        (v) => v.val() === false,
       ),
     );
   });
@@ -590,7 +583,7 @@ requestsSimple.forEach((path) => {
       `porter(targetObject).remove('${path}')`,
       testLauncher(
         () => porter({}).remove(path),
-        (v) => v === false,
+        (v) => v.val() === false,
       ),
     );
   });
@@ -607,7 +600,7 @@ requestsSimple.forEach((path) => {
       `porter.remove(targetObject, '${path}', true)`,
       testLauncher(
         () => porter.remove(target, path, true),
-        (v) => v === targetValue && !has(target.games, 'Half-Life'),
+        (v) => v.val() === targetValue && !has(target.games, 'Half-Life'),
       ),
     );
   });
@@ -622,8 +615,8 @@ requestsSimple.forEach((path) => {
       'Porter.remove: Should delete a property by the path and return the value from there.',
       `porter(targetObject).remove('${path}', true)`,
       testLauncher(
-        () => porter(target).remove(path),
-        (v) => v === targetValue && !has(target.games, 'Half-Life'),
+        () => porter(target).remove(path, true),
+        (v) => v.val() === targetValue && !has(target.games, 'Half-Life'),
       ),
     );
   });
@@ -641,7 +634,7 @@ requestsSimple.forEach((path) => {
       `porter.remove({}, '${path}, true')`,
       testLauncher(
         () => porter.remove({}, path, true),
-        (v) => v === undefined,
+        (v) => v.val() === undefined,
       ),
     );
   });
@@ -659,7 +652,7 @@ requestsSimple.forEach((path) => {
       `porter({}).remove('${path}, true')`,
       testLauncher(
         () => porter({}).remove(path, true),
-        (v) => v === undefined,
+        (v) => v.val() === undefined,
       ),
     );
   });
@@ -680,7 +673,7 @@ requestsSimple.forEach((path) => {
       testLauncher(
         () => porter.replace(target, path, value),
         (v) => (
-          v === previousValue
+          v.val() === previousValue
           && target.games['Half-Life'] !== previousValue
           && target.games['Half-Life'] === value
         ),
@@ -700,7 +693,7 @@ requestsArrayProperties.forEach((path) => {
       testLauncher(
         () => porter.replace(target, path, value),
         (v) => (
-          v === previousValue
+          v.val() === previousValue
           && middleNode.name !== previousValue
           && middleNode.name === value
         ),
@@ -720,7 +713,7 @@ requestsArrayNonStandardProperties.forEach((path, i) => {
         default: return undefined;
       }
     })();
-    const comparer = (val, prev, cur) => val === prev && cur !== prev && cur !== value;
+    const comparer = (v, prev, cur) => v === prev && cur !== prev && cur === value;
 
     logResults(
       'Porter.replace: Should replace the property value by the existing path with the new value',
@@ -728,10 +721,12 @@ requestsArrayNonStandardProperties.forEach((path, i) => {
       testLauncher(
         () => porter.replace(target, path, value),
         (v) => {
+          const val = v.val();
+
           switch (i) {
-            case 0: return comparer(v, previousValue, middleNode.info.name);
-            case 1: return comparer(v, previousValue, middleNode[13]);
-            case 2: return comparer(v, previousValue, middleNode[42]);
+            case 0: return comparer(val, previousValue, middleNode.info.name);
+            case 1: return comparer(val, previousValue, middleNode[13]);
+            case 2: return comparer(val, previousValue, middleNode[42]);
             default: return false;
           }
         },
@@ -743,7 +738,16 @@ requestsNullableProperties.forEach((path, i) => {
   tests.push((porter, target) => {
     const value = Symbol('Value');
     const middleNode = target.books[hhgg()];
-    const comparer = (val, prev, cur) => val === prev && cur !== prev && cur !== value;
+    const isEqual = (a, b) => {
+      if (a === b) {
+        return true;
+      }
+      if (Number.isNaN(a) && Number.isNaN(b)) {
+        return true;
+      }
+      return false;
+    }
+    const comparer = (v, prev, cur) => isEqual(v, prev) && cur !== prev && cur === value;
     const previousValue = (() => {
       switch (i) {
         case 0: return middleNode[2].read;
@@ -760,11 +764,13 @@ requestsNullableProperties.forEach((path, i) => {
       testLauncher(
         () => porter.replace(target, path, value),
         (v) => {
+          const val = v.val();
+
           switch (i) {
-            case 0: return comparer(v, previousValue, middleNode[2].read);
-            case 1: return comparer(v, previousValue, middleNode[3].read);
-            case 2: return comparer(v, previousValue, middleNode[5].year);
-            case 3: return comparer(v, previousValue, target.games['Half-Life'][4]);
+            case 0: return comparer(val, previousValue, middleNode[2].read);
+            case 1: return comparer(val, previousValue, middleNode[3].read);
+            case 2: return comparer(val, previousValue, middleNode[5].year);
+            case 3: return comparer(val, previousValue, target.games['Half-Life'][4]);
             default: return false;
           }
         },
@@ -784,9 +790,9 @@ requestsByMixedType.forEach((path) => {
       testLauncher(
         () => porter.replace(target, path, value),
         (v) => (
-          v === previousValue
+          v.val() === previousValue
           && middleNode.year !== previousValue
-          && middleNode.year !== value
+          && middleNode.year === value
         ),
       ),
     );
@@ -804,9 +810,9 @@ requestsInfinityValue.forEach((path) => {
       testLauncher(
         () => porter.replace(target, path, value),
         (v) => (
-          v === previousValue
+          v.val() === previousValue
           && middleNode.name !== previousValue
-          && middleNode.name !== value
+          && middleNode.name === value
         ),
       ),
     );
@@ -825,7 +831,7 @@ requestsSimple.forEach((path) => {
       testLauncher(
         () => porter(target).replace(path, value),
         (v) => (
-          v === previousValue
+          v.val() === previousValue
           && target.games['Half-Life'] !== previousValue
           && target.games['Half-Life'] === value
         ),
@@ -848,8 +854,8 @@ requestsSimple.forEach((path) => {
       message,
       `porter.replace({}, '${path}', value)`,
       testLauncher(
-        () => porter.replace({}, path, value),
-        (v) => v === undefined && target.games && target.games['Half-Life'] === value,
+        () => porter.replace(target, path, value),
+        (v) => v.val() === undefined && target.games && target.games['Half-Life'] === value,
       ),
     );
   });
@@ -870,7 +876,7 @@ requestsSimple.forEach((path) => {
       `porter({}).replace('${path}', value)`,
       testLauncher(
         () => porter(target).replace(path, value),
-        (v) => v === undefined && target.games && target.games['Half-Life'] === value,
+        (v) => v.val() === undefined && target.games && target.games['Half-Life'] === value,
       ),
     );
   });
@@ -890,7 +896,7 @@ requestsSimple.forEach((path) => {
       `porter.replace({}, '${path}', value, false)`,
       testLauncher(
         () => porter.replace(target, path, value, false),
-        (v) => v === undefined && !has(target, 'games'),
+        (v) => v.val() === undefined && !has(target, 'games'),
       ),
     );
   });
@@ -910,7 +916,7 @@ requestsSimple.forEach((path) => {
       `porter({}).replace('${path}', value, false)`,
       testLauncher(
         () => porter(target).replace(path, value, false),
-        (v) => v === undefined && !has(target, 'games'),
+        (v) => v.val() === undefined && !has(target, 'games'),
       ),
     );
   });
