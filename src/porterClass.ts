@@ -69,6 +69,7 @@ class Porter implements PorterClassInterface {
       const subjectMap: SubjectMap = getSubjectMap(this.subject, pathDetails, force);
       this.result.track = subjectMap;
       this.result.done = subjectMap.every((s) => s.available);
+      this.result.value = false;
 
       if (this.result.done) {
         const lastMember: SubjectMapMember = subjectMap[subjectMap.length - 1];
@@ -76,6 +77,7 @@ class Porter implements PorterClassInterface {
 
         if (isSubject(target)) {
           target[key as string] = value;
+          this.result.value = true;
         }
       }
     }

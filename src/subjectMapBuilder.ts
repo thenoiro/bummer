@@ -77,7 +77,6 @@ const getSubjectMap = (
       }
       inspectedObject = newSubject;
       prevMember.value = newSubject;
-      prevMember.created = true;
       inspectedObjectExist = true;
     }
     if (inspectedObjectExist) {
@@ -88,6 +87,7 @@ const getSubjectMap = (
         nextMember.value = inspectedObject[subjectKey];
       } else if (build) {
         inspectedObject[subjectKey] = undefined;
+        nextMember.created = true;
       }
     }
     nextMember.available = nextMember.exist || nextMember.created;
