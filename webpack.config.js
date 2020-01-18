@@ -12,19 +12,24 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 function configBuilder(en = 'development') {
   let postfix = '';
   let mode = en;
+  const entry = {
+    porter: './src/porter.ts',
+  };
 
   if (mode === 'test') {
     mode = 'production';
     postfix = '_test';
+  } else {
+    entry.index = './src/index.js';
   }
   // Base configuration object
   const config = {
     mode,
+    entry,
     devtool: mode === 'development' ? 'inline-source-map' : 'source-map',
-    entry: './src/porter.ts',
     output: {
       path: path.resolve(__dirname, dist),
-      filename: `porter${postfix}.js`,
+      filename: `[name]${postfix}.js`,
       library: 'porter',
       libraryExport: 'default',
       libraryTarget: 'umd',
@@ -58,10 +63,18 @@ function configBuilder(en = 'development') {
           use: 'ts-loader',
           exclude: '/node_modules/',
         },
+        {
+          test: /\.md$/,
+          exclude: '/node_modules/',
+          use: [
+            { loader: 'html-loader' },
+            { loader: 'markdown-loader' },
+          ],
+        },
       ],
     },
     resolve: {
-      extensions: ['.ts', '.js'],
+      extensions: ['.ts', '.js', '.md'],
     },
     devServer: {
       contentBase: `./${dist}`,
