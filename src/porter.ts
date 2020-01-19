@@ -7,14 +7,14 @@ import {
 
 // Entry point
 const porter: PorterAPI = (subject: Subject) => {
-  const wrapper = new Porter(subject);
+  const wrapper = () => new Porter(subject);
 
   return {
-    get: wrapper.get,
-    set: wrapper.set,
-    check: wrapper.check,
-    remove: wrapper.remove,
-    replace: wrapper.replace,
+    get: (...args) => wrapper().get(...args),
+    set: (...args) => wrapper().set(...args),
+    check: (...args) => wrapper().check(...args),
+    remove: (...args) => wrapper().remove(...args),
+    replace: (...args) => wrapper().replace(...args),
   };
 };
 porter.get = (subject, ...options) => porter(subject).get(...options);
