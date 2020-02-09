@@ -8,7 +8,7 @@ const isDevServer = argv.includes('--dev-server');
 /* Dependencies */
 const Webpack = require('webpack');
 const DevServer = require('webpack-dev-server');
-const { log, logError } = require('./porter-logger.js');
+const { log, logError } = require('./bummer-logger');
 const webpackConfigBuilder = require('./webpack.config.js');
 const server = require('./server.js');
 const openPage = require('./open-page.js');

@@ -1,5 +1,5 @@
 const open = require('open');
-const { log/* , logError */ } = require('./porter-logger.js');
+const { log/* , logError */ } = require('./bummer-logger.js');
 
 
 /* Open page (<url>) in the browser */

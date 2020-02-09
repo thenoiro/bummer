@@ -23,7 +23,7 @@ export type SubjectMapOptions = Partial<Omit<SubjectMapMember, 'key'>> & Pick<Su
 
 export type SubjectMap = SubjectMapMember[];
 
-export interface PorterResultInterface {
+export interface BummerResultInterface {
   done: Result;
   value: Value;
   track: SubjectMapMember[];
@@ -31,22 +31,22 @@ export interface PorterResultInterface {
   val(): Value;
 }
 
-export interface PorterAPIMethods {
-  get(subject: Subject, path: AnyPath): PorterResultInterface;
-  set(subject: Subject, path: AnyPath, value: Value, force?: Flag): PorterResultInterface;
-  check(subject: Subject, path: AnyPath): PorterResultInterface;
-  remove(subject: Subject, path: AnyPath, pop?: Flag): PorterResultInterface;
-  replace(subject: Subject, path: AnyPath, value: Value, force?: Flag): PorterResultInterface;
+export interface BummerAPIMethods {
+  get(subject: Subject, path: AnyPath): BummerResultInterface;
+  set(subject: Subject, path: AnyPath, value: Value, force?: Flag): BummerResultInterface;
+  check(subject: Subject, path: AnyPath): BummerResultInterface;
+  remove(subject: Subject, path: AnyPath, pop?: Flag): BummerResultInterface;
+  replace(subject: Subject, path: AnyPath, value: Value, force?: Flag): BummerResultInterface;
 }
-export interface PorterAPI extends PorterAPIMethods {
-  (subject: Subject): PorterWrapper;
+export interface BummerAPI extends BummerAPIMethods {
+  (subject: Subject): BummerWrapper;
 }
-export interface PorterWrapper extends PorterClassInterface {}
+export interface BummerWrapper extends BummerClassInterface {}
 
-export interface PorterClassInterface {
-  get(path: AnyPath): PorterResultInterface;
-  set(path: AnyPath, value: Value, force?: Flag): PorterResultInterface;
-  check(path: AnyPath): PorterResultInterface;
-  remove(path: AnyPath, pop?: Flag): PorterResultInterface;
-  replace(path: AnyPath, value: Value, force?: Flag): PorterResultInterface;
+export interface BummerClassInterface {
+  get(path: AnyPath): BummerResultInterface;
+  set(path: AnyPath, value: Value, force?: Flag): BummerResultInterface;
+  check(path: AnyPath): BummerResultInterface;
+  remove(path: AnyPath, pop?: Flag): BummerResultInterface;
+  replace(path: AnyPath, value: Value, force?: Flag): BummerResultInterface;
 }

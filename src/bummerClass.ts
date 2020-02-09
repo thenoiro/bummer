@@ -1,4 +1,4 @@
-import PorterResult from './porterResultClass';
+import BummerResult from './bummerResultClass';
 import reducePath from './pathReducer';
 import getSubjectMap from './subjectMapBuilder';
 import { isPath, isSubject } from './validators';
@@ -8,8 +8,8 @@ import {
   AnyPath,
   Value,
   Flag,
-  PorterClassInterface,
-  PorterResultInterface,
+  BummerClassInterface,
+  BummerResultInterface,
   SubjectMap,
   SubjectMapMember,
 } from './commonTypes';
@@ -22,10 +22,10 @@ const ERRORS = {
 };
 
 
-class Porter implements PorterClassInterface {
+class Bummer implements BummerClassInterface {
   private subject: Subject;
 
-  private result: PorterResultInterface = new PorterResult();
+  private result: BummerResultInterface = new BummerResult();
 
 
   constructor(subject: Subject) {
@@ -45,7 +45,7 @@ class Porter implements PorterClassInterface {
   }
 
 
-  get(this: Porter, path: AnyPath) {
+  get(this: Bummer, path: AnyPath) {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
@@ -61,7 +61,7 @@ class Porter implements PorterClassInterface {
     return this.result;
   }
 
-  set(this: Porter, path: AnyPath, value: Value, force: Flag = true) {
+  set(this: Bummer, path: AnyPath, value: Value, force: Flag = true) {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
@@ -84,14 +84,14 @@ class Porter implements PorterClassInterface {
     return this.result;
   }
 
-  check(this: Porter, path: AnyPath) {
-    const result: PorterResultInterface = this.get(path);
+  check(this: Bummer, path: AnyPath) {
+    const result: BummerResultInterface = this.get(path);
     result.value = result.done;
     return result;
   }
 
-  remove(this: Porter, path: AnyPath, pop: Flag = false) {
-    const result: PorterResultInterface = this.get(path);
+  remove(this: Bummer, path: AnyPath, pop: Flag = false) {
+    const result: BummerResultInterface = this.get(path);
 
     if (!pop) {
       result.value = result.done;
@@ -107,7 +107,7 @@ class Porter implements PorterClassInterface {
     return result;
   }
 
-  replace(this: Porter, path: AnyPath, value: Value, force = true) {
+  replace(this: Bummer, path: AnyPath, value: Value, force = true) {
     const isValidPath = this.validatePath(path);
 
     if (isValidPath) {
@@ -143,4 +143,4 @@ class Porter implements PorterClassInterface {
 }
 
 
-export default Porter;
+export default Bummer;

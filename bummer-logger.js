@@ -1,5 +1,5 @@
-function porterLogger(type, ...args) {
-  const prefix = '\n>>> PORTER:\n';
+function bummerLogger(type, ...args) {
+  const prefix = '\n>>> BUMMER:\n';
   const inform = console;
 
   switch (type) {
@@ -13,9 +13,9 @@ function porterLogger(type, ...args) {
 
 module.exports = {
   log(...args) {
-    porterLogger('log', ...args);
+    bummerLogger('log', ...args);
   },
   logError(...args) {
-    porterLogger('error', ...args);
+    bummerLogger('error', ...args);
   },
 };

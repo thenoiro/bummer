@@ -1,7 +1,7 @@
 /* Dependencies */
 const express = require('express');
 const openPage = require('./open-page.js');
-const { log/* , logError */ } = require('./porter-logger.js');
+const { log/* , logError */ } = require('./bummer-logger.js');
 
 
 /* Simple express static server */

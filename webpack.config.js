@@ -13,7 +13,7 @@ function configBuilder(en = 'development') {
   let postfix = '';
   let mode = en;
   const entry = {
-    porter: './src/porter.ts',
+    bummer: './src/bummer.ts',
   };
 
   if (mode === 'test') {
@@ -30,7 +30,7 @@ function configBuilder(en = 'development') {
     output: {
       path: path.resolve(__dirname, dist),
       filename: `[name]${postfix}.js`,
-      library: 'porter',
+      library: 'bummer',
       libraryExport: 'default',
       libraryTarget: 'umd',
       globalObject: `(function() {
@@ -50,7 +50,7 @@ function configBuilder(en = 'development') {
       new HtmlWebpackPlugin({
         template: './src/index.ejs',
         templateParameters: {
-          title: 'Porter Test Page',
+          title: 'Bummer Test Page',
           testvar: 'Test works',
         },
         favicon: './src/favicon.ico',
