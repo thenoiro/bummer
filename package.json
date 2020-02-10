@@ -2,7 +2,7 @@
   "name": "bummer",
   "version": "1.0.0",
   "description": "A small script that helps easily and safely get, set, remove, replace or check an object's properties located at any depth.",
-  "main": "dist/bummer.min.js",
+  "main": "dist/bummer.js",
   "scripts": {
     "start": "NODE_ENV=production node run.js",
     "start:open": "NODE_ENV=production node run.js --open",
