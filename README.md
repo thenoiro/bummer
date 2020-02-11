@@ -23,8 +23,6 @@ if (axisFormat) {
 
 ## Usage:
 
-**`bummer`** object is a function itself which also contains several methods:  
-
 + [**`bummer.get()`**](#bummerget) - allows safely get a value from an object.
 
 + [**`bummer.set()`**](#bummerset) - allows to set a value.
@@ -36,6 +34,19 @@ if (axisFormat) {
 + [**`bummer.replace()`**](#bummerreplace) - allows to set up a new property, and returns an old one.
 
 All these methods take two identical arguments first: [**`subject`**](#subject) and [**`path`**](#path), and always returns [**`bummer_result`**](#bummer_result) object.
+
+
+### Caching:
+
+**`bummer`** object is a function itself. It allows you to cache first argument, and only then call other methods. In this case you have to pass all the same arguments, but without first one. For example:
+
+```js
+// const name = bummer.get(data, 'user.meta.name').val();
+// const phone = bummer.get(data, 'user.meta.phone[0]').val();
+const settings = bummer(data);
+const name = settings.get('user.meta.name').val();
+const phone = settngs.get('user.meta.phone[0]').val();
+```
 
 ------------------------------------
 
