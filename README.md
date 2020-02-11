@@ -259,7 +259,7 @@ In the case of a non-standard property name, you can use **escape character** _*
 const data = { target: {} };
 data.target['some.non-standard[name]'] = 42;
 
-const answer = bummer(data).get('target.some//non-standard//[name//]');
+const answer = bummer(data).get('target.some//.non-standard//[name//]');
 console.log(answer.val());  // > 42
 ```
 
