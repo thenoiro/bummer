@@ -924,6 +924,19 @@ requestsSimple.forEach((path) => {
 
 
 /** SPECIAL */
+tests.push((bummer, target) => {
+  const value = target.special['long[non-standard]property-name_for.testing'];
+  const message = 'Bummer.get: Shout correctly work with special characters.';
+
+  logResults(
+    message,
+    'bummer(subject).get(\'special.long\\\\[non-standard\\\\]property-name_for\\\\.testing\')',
+    testLauncher(
+      () => bummer(target).get('special.long\\[non-standard\\]property-name_for\\.testing'),
+      (v) => v.val() === value,
+    ),
+  );
+});
 
 /** Summary */
 tests.push((/* bummer, target */) => {

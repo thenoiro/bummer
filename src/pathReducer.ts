@@ -1,6 +1,29 @@
 import { AnyPath, PathKey, PathKeyString } from './commonTypes';
 
 const isPathKeyString = (key: any): key is PathKeyString => typeof key === 'string';
+const escapeSearch = (sym: string, str: string): number => {
+  // /[^\\]\${sym}/gmi
+  const escapeRegexp = new RegExp(`[^\\\\]\\${sym}`, 'gmi');
+
+  if (str[0] === sym) {
+    return 0;
+  }
+  let result = str.search(escapeRegexp);
+
+  if (result !== -1) {
+    // First symbol in matching is not a target symbol
+    result += 1;
+  }
+  return result;
+};
+const unescapeKeys = (keys: PathKeyString[]): PathKeyString[] => keys.map((k: PathKeyString) => {
+  let result = k.replace(/\\./gmi, (match: string) => match[1]);
+
+  if (result[result.length - 1] === '//') {
+    result = result.slice(-1);
+  }
+  return result;
+});
 
 // TODO: check keys length (could be zero)
 const splitStringKey = (pathKey: PathKeyString): PathKeyString[] => {
@@ -9,8 +32,8 @@ const splitStringKey = (pathKey: PathKeyString): PathKeyString[] => {
   let safeCounter: number = pathKey.length;
 
   while (safeCounter > 0) {
-    const dotIndex: number = pathKeyBillet.indexOf('.');
-    const bktOpenIndex: number = pathKeyBillet.indexOf('[');
+    const dotIndex: number = escapeSearch('.', pathKeyBillet);
+    const bktOpenIndex: number = escapeSearch('[', pathKeyBillet);
 
     const isDot: boolean = dotIndex > -1;
     const isBkt: boolean = bktOpenIndex > -1;
@@ -62,7 +85,7 @@ const splitStringKey = (pathKey: PathKeyString): PathKeyString[] => {
       }
     }
   }
-  return result;
+  return unescapeKeys(result);
 };
 
 const destructurPathKey = (pathKey: PathKey): PathKey[] => {

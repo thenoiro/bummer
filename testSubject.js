@@ -65,7 +65,9 @@ const getTestSubject = () => {
         },
       ],
     },
-    'long[non-standart]property-name_for.testing': {},
+    special: {
+      'long[non-standard]property-name_for.testing': {},
+    },
     [theAnswer]: 42,
   };
   testSubject.books[hhgg()].info = {

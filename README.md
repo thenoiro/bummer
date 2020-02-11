@@ -250,6 +250,19 @@ _**`key<string|number|symbol>`**_ - string, number or symbol, which describes th
 
 + _**`key[]`**_ - contains ordered keys of any type described before. For example, the *`some.path.to.the.property`* is the same as *`['some', 'path', 'to', 'the', 'property']`*, or even *`['some.path', 'to', 'the[property]']`*. It is usefull in cases, when one of your properties is **symbol** type (e.g. *`['users[0].permissions', sym, 'read']`*).
 
+
+#### Escape character
+
+In the case of a non-standard property name, you can use **escape character** _**`/`**_. **NOTE**: because of _**`/`**_ symbol has used in javascript as an escape character too, you have to duplicate it when creating a string:
+
+```js
+const data = { target: {} };
+data.target['some.non-standard[name]'] = 42;
+
+const answer = bummer(data).get('target.some//non-standard//[name//]');
+console.log(answer.val());  // > 42
+```
+
 ------------------------------------
 
 ### `<bummer_result>`
